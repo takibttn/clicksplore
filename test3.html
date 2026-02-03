@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html lang="en"  dir="rtl" lang="ar">
+  
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clicksplore – Premium Shared Subscriptions</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Load environment variables - MUST BE FIRST
+    const SUPABASE_URL = process.env.SUPABASE_URL || 'https://hsomlteyiyjtusfqxfvh.supabase.co';
+    const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhzb21sdGV5aXlqdHVzZnF4ZnZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwMTUzMDgsImV4cCI6MjA3MDU5MTMwOH0.example_key_here';
+    const API_BASE_CONFIG = process.env.API_BASE || 'https://clickserver.vercel.app';
+
+    // Initialize Supabase client
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // Make it globally available
+    window.supabase = supabaseClient;
+  </script>
+  <script src="language.js"></script>
+  <style>
+    :root{
+      --hot:#ff00ff;--indigo:#08003d;--violet:#8c00ff;
+      --glass-1:rgba(11,8,32,.78);--glass-2:rgba(11,8,32,.64);
+      --white:#ffffff;--text:#eef0ff;--muted:rgba(255,255,255,.8);
+      --line:rgba(255,255,255,.16);--line-2:rgba(255,255,255,.22);
+      --success:#28a745; --danger:#dc3545; --warning:#ffb703;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      font-family:'Inter',system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      line-height:1.55;color:var(--text);
+      background: radial-gradient(1200px 800px at 10% 10%, rgba(255,0,255,.15), transparent 60%),
+                  radial-gradient(1000px 700px at 90% 20%, rgba(140,0,255,.15), transparent 60%),
+                  linear-gradient(135deg,var(--hot) 0%, var(--indigo) 100%);
+      background-attachment: fixed;overflow-x:hidden;
+    }
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;
+      background: conic-gradient(from 180deg at 70% -20%, rgba(255,255,255,.08), rgba(0,0,0,0) 40%),
+                  radial-gradient(800px 300px at 50% -5%, rgba(255,255,255,.08), transparent 60%);
+      mix-blend-mode: screen;opacity:.8}
+    .ad-space{background:rgba(255,255,255,.06);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);padding:12px 16px;text-align:center}
+    .ad-space .ad-placeholder{color:var(--muted);font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;position:relative;display:inline-block}
+    .ad-space .ad-placeholder:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);animation:shimmer 2.8s infinite}
+    nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:18px 0;transition:.25s ease;background:rgba(8,0,61,.18);backdrop-filter:blur(14px);border-bottom:1px solid transparent}
+    nav.scrolled{background:rgba(8,0,61,.6);border-color:var(--line)}
+    .nav-container{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 20px;gap:16px}
+    .logo{font-size:1.6rem;font-weight:900;letter-spacing:.3px;text-decoration:none;background:linear-gradient(45deg,var(--hot),#9b5cff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .nav-links{list-style:none;display:flex;gap:26px}
+    .nav-links a{color:var(--text);text-decoration:none;position:relative}
+    .nav-links a:after{content:"";position:absolute;left:0;bottom:-6px;height:2px;width:0;background:linear-gradient(90deg,var(--hot),#9b5cff);transition:width .25s}
+    .nav-links a:hover{opacity:.9}
+    .nav-links a:hover:after{width:100%}
+    .icon-btn{position:relative;border:1px solid var(--line);background:rgba(255,255,255,.06);backdrop-filter:blur(8px);color:var(--text);font-size:1.05rem;padding:10px;border-radius:50%;cursor:pointer;transition:transform .2s, background .2s, border-color .2s;display:grid;place-items:center}
+    .icon-btn:hover{transform:translateY(-2px) scale(1.05);background:rgba(255,255,255,.12);border-color:var(--line-2)}
+    .cart-badge{position:absolute;top:-6px;right:-6px;background:linear-gradient(135deg,#ff5b8a,#ff984f);color:#fff;border-radius:999px;min-width:18px;height:18px;display:grid;place-items:center;font-size:.68rem;font-weight:700;padding:0 6px;box-shadow:0 6px 18px rgba(255,91,138,.35)}
+    .dropdown{position:relative}
+    .dropdown-menu{position:absolute;top:110%;left:0;min-width:280px;background:var(--glass-1);border:1px solid var(--line);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.35);display:none;padding:12px;animation:fadeIn .2s ease;z-index:1001}
+    .dropdown-menu.show{display:block}
+    .dropdown-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--text);text-decoration:none;border-left:3px solid transparent;cursor:pointer}
+    .dropdown-item:hover{background:rgba(255,255,255,.06);border-left-color:var(--hot)}
+    .lang-btn{border:1px solid var(--line);background:rgba(255,255,255,.06);backdrop-filter:blur(8px);color:var(--text);padding:9px 14px;border-radius:999px;display:flex;align-items:center;gap:8px;cursor:pointer}
+    .lang-menu{right:0;left:auto}
+    .hero{min-height:92vh;display:grid;place-items:center;text-align:center;padding:140px 20px 80px;position:relative}
+    .floating{position:absolute;inset:0;pointer-events:none;opacity:.12}
+    .floating i{position:absolute;font-size:3rem;animation:float 6s ease-in-out infinite}
+    .floating i:nth-child(1){top:18%;left:10%}
+    .floating i:nth-child(2){top:60%;left:85%;animation-delay:1s}
+    .floating i:nth-child(3){top:30%;left:78%;animation-delay:2s}
+    .floating i:nth-child(4){top:76%;left:14%;animation-delay:3s}
+    .hero h1{font-size:3.2rem;line-height:1.08;font-weight:900;color:#fff;letter-spacing:.2px;animation:slideUp .6s ease both}
+    .hero .highlight{background:linear-gradient(45deg,#ff61d2,#fe9090,#ffd26f,#72facc);background-size:300% 300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:gradient 5s ease infinite}
+    .hero p{max-width:780px;margin:18px auto 36px;color:var(--muted);font-size:1.15rem}
+    .cta{display:inline-block;border:none;border-radius:50px;padding:16px 34px;font-weight:800;letter-spacing:.2px;text-decoration:none;color:#0b0820;background:linear-gradient(135deg,#ffd26f,#ff61d2);box-shadow:0 14px 34px rgba(255,97,210,.35);cursor:pointer;transition:transform .2s}
+    .cta:hover{transform:translateY(-2px)}
+    .section{padding:96px 20px;background:#fff;color:#333}
+    .container{max-width:1200px;margin:0 auto}
+    .section-title{font-size:2.2rem;font-weight:900;color:#222;text-align:center;margin-bottom:42px}
+    .filters{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:32px}
+    .chip{border:2px solid #e9e6ff;background:linear-gradient(180deg,#fafaff,#f3f1ff);color:#5a51a0;padding:10px 16px;border-radius:999px;cursor:pointer;font-weight:600}
+    .chip.active, .chip:hover{background:linear-gradient(135deg,var(--hot),#7a5cff);color:#fff;border-color:transparent;transform:translateY(-1px)}
+    
+    /* Duration Filter Styles */
+    .duration-filter {display:none;}
+    .duration-notice {text-align: center; color: #666; font-style: italic; margin-bottom: 20px; padding: 15px; background: rgba(122, 92, 255, 0.05); border-radius: 10px; border-left: 4px solid #7a5cff;}
+
+    .duration-modal-card {width:min(420px,92vw);background:#fff;border-radius:22px;padding:28px;box-shadow:0 28px 80px rgba(13,15,31,.4);color:#222;animation:popIn .25s ease;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);}
+    .duration-modal-header {display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    .duration-modal-header h3 {margin:0;font-size:1.2rem;font-weight:800;color:#181132;}
+    .duration-modal-close {background:none;border:none;font-size:1.2rem;cursor:pointer;color:#666;}
+    .duration-options {display:flex;flex-direction:column;gap:12px;margin:16px 0;}
+    .duration-option {border:2px solid #ece9ff;border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .2s, box-shadow .2s;}
+    .duration-option.active {border-color:#7a5cff;box-shadow:0 12px 32px rgba(122, 92, 255, 0.18);}
+    .duration-option h4 {margin:0;font-size:1rem;color:#1d123d;}
+    .duration-option span {font-weight:700;color:#6a5cff;}
+    .duration-option small {display:block;color:#777;margin-top:4px;font-size:.82rem;}
+    .duration-modal-footer {display:flex;justify-content:flex-end;gap:12px;margin-top:18px;}
+    .ghost-btn {background:transparent;border:2px solid #ece9ff;border-radius:12px;padding:10px 16px;font-weight:700;color:#5a51a0;cursor:pointer;}
+    .primary-btn {background:linear-gradient(135deg,#7a5cff,#b05cff);color:#fff;border:none;border-radius:12px;padding:12px 20px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;}
+    @keyframes popIn {from{opacity:0;transform:translate(-50%,-40%) scale(0.96);} to {opacity:1;transform:translate(-50%,-50%) scale(1);} }
+    
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:26px}
+    .card{background:#fff;border-radius:18px;box-shadow:0 18px 60px rgba(8,0,61,.12);padding:28px 22px;text-align:center;position:relative;overflow:hidden;border-top:4px solid #ece9ff;transition:transform .2s ease, box-shadow .2s ease}
+    .card:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 26px 80px rgba(8,0,61,.18)}
+    .card .icon{width:72px;height:72px;margin:0 auto 14px;border-radius:16px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#7a5cff,#b05cff);box-shadow:0 10px 28px rgba(122,92,255,.35);font-size:1.6rem}
+    .card .icon.product-thumb{padding:0;background:#f7f6ff;border:1px solid rgba(122,92,255,.15);overflow:hidden;box-shadow:none}
+    .card .icon.product-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .card h3{font-size:1.15rem;color:#222;margin-bottom:8px}
+    .desc{font-size:.92rem;color:#5b5b5b;min-height:44px}
+    .price-wrap{margin:14px 0;position:relative}
+    .price{font-size:2rem;font-weight:900;color:#6a5cff}
+    .original{color:#9c9c9c;text-decoration:line-through;font-size:.95rem}
+    .save{position:absolute;top:-10px;right:-10px;background:#ff6b6b;color:#fff;font-size:.72rem;font-weight:800;padding:4px 8px;border-radius:10px}
+    .meta{display:flex;justify-content:space-between;gap:10px;color:#666;font-size:.86rem;margin:10px 0}
+    .btn{width:100%;border:none;border-radius:10px;padding:12px 14px;background:linear-gradient(135deg,#7a5cff,#b05cff);color:#fff;font-weight:700;cursor:pointer}
+    .btn:disabled{background:#cfd1d7;color:#777}
+    .hiw{background:linear-gradient(135deg,#f0c3ff,#ffb9c1);color:#1d123d}
+    .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:26px;margin-top:34px}
+    .step{background:rgba(255,255,255,.65);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.65);box-shadow:0 14px 40px rgba(8,0,61,.15);border-radius:18px;padding:24px;text-align:center}
+    .step .num{width:64px;height:64px;border:2px dashed #7a5cff;border-radius:50%;display:grid;place-items:center;font-size:1.3rem;font-weight:900;margin:0 auto 12px;color:#7a5cff}
+    .testimonials{background:#fff}
+    .quote{background:linear-gradient(135deg,#7a5cff,#b05cff);color:#fff;border-radius:20px;padding:32px;text-align:center;box-shadow:0 24px 60px rgba(122,92,255,.35)}
+    .badges{background:#f7f7fb}
+    .badges-grid{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:26px}
+    .badge{display:flex;align-items:center;gap:10px;padding:12px 18px;background:#fff;border-radius:999px;box-shadow:0 8px 20px rgba(8,0,61,.08);font-weight:700}
+    .badge i{color:#28a745}
+    footer{background:#0b0820;color:#dfe2ff;text-align:center;padding:54px 20px 24px}
+    footer .links{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
+    footer .links a{color:#dfe2ff;text-decoration:none}
+    footer .links a:hover{color:#fff}
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);z-index:2000;display:none}
+    .modal.show{display:block}
+    .modal-card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;border-radius:18px;padding:28px;width:min(480px,92vw);box-shadow:0 24px 60px rgba(0,0,0,.3);color:#222}
+    .modal-card h3{margin-bottom:14px}
+    .form{display:grid;gap:12px}
+    .input{padding:12px 14px;border-radius:10px;border:2px solid #ece9ff;font-size:.98rem}
+    .primary{background:linear-gradient(135deg,#7a5cff,#b05cff);color:#fff;border:none;border-radius:10px;padding:12px 14px;font-weight:800;cursor:pointer}
+    .link{color:#6a5cff;cursor:pointer;text-decoration:none}
+    .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#12101d;color:#fff;border:1px solid var(--line);padding:10px 16px;border-radius:999px;display:none;z-index:2200}
+    .toast.show{display:flex;align-items:center;gap:8px}
+    .search{position:fixed;inset:0;display:none;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:2100}
+    .search.show{display:block}
+    .search-box{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;border-radius:16px;padding:24px;width:min(640px,92vw)}
+    .search-input{width:100%;padding:14px 18px;border:2px solid #ece9ff;border-radius:999px;font-size:1.05rem}
+    .hidden{display:none !important}
+
+    /* WhatsApp FAB */
+    .whatsapp-fab{
+      position: fixed; right: 18px; bottom: 18px; z-index: 2500;
+      width: 58px; height: 58px; border-radius: 999px;
+      display:grid; place-items:center; font-size:1.6rem; color:#fff;
+      background:linear-gradient(135deg,#25D366,#128C7E);
+      box-shadow:0 16px 40px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.15);
+      border:1px solid rgba(255,255,255,.12); transition:.2s transform;
+    }
+    .whatsapp-fab:hover{ transform: translateY(-2px) scale(1.03); }
+
+    @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+    @keyframes gradient{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+    @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+    @media (max-width: 768px){
+      .nav-links{display:none}
+      .hero{padding-top:120px}
+      .hero h1{font-size:2.2rem}
+      .grid{grid-template-columns:1fr}
+      .duration-filter {flex-direction: row; justify-content: space-between; gap: 4px;}
+      .duration-btn {flex: 1; min-width: unset; max-width: none; padding: 8px 4px; font-size: 0.75rem;}
+    }
+    @media (max-width:576px){
+      .cta{width:100%}
+      .modal-card{padding:20px}
+    }
+
+
+  </style>
+</head>
+<body>
+  <div class="ad-space"><span class="ad-placeholder">🎯 Advertisement Space – Premium Placement Available</span></div>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <div class="nav-container">
+      <a href="#home" class="logo">Clicksplore</a>
+      <ul class="nav-links">
+        <li class="dropdown">
+          <button class="lang-btn" id="catsBtn"><i class="fa-solid fa-bars"></i> Categories <i class="fa-solid fa-chevron-down" style="font-size:.8rem"></i></button>
+          <div class="dropdown-menu" id="catsMenu">
+            <!-- Filled dynamically from DB -->
+          </div>
+        </li>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#how">How it Works</a></li>
+        <li><a href="#testimonials">Reviews</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="icon-btn" id="searchBtn" title="Search"><i class="fa-solid fa-search"></i></button>
+        <button class="lang-btn" id="currencyToggle" title="Toggle Currency">
+          <i class="fa-solid fa-coins" style="margin-right:6px;"></i>
+          <span id="currencyLabel">USDT</span>
+        </button>
+        <div class="dropdown">
+          <button class="lang-btn" id="langBtn"><i class="fa-solid fa-globe"></i><span id="currentLang">EN</span><i class="fa-solid fa-chevron-down" style="font-size:.8rem"></i></button>
+          <div class="dropdown-menu lang-menu" id="langMenu">
+            <a class="dropdown-item" data-lang="en">🇬🇧 English</a>
+            <a class="dropdown-item" data-lang="ar">🇩🇿 العربية</a>
+          </div>
+        </div>
+        <button class="icon-btn" id="cartBtn" title="Cart"><i class="fa-solid fa-cart-shopping"></i><span class="cart-badge" id="cartCount" style="display:none">0</span></button>
+        <div id="userSlot"></div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="floating">
+      <i class="fa-brands fa-netflix"></i>
+      <i class="fa-brands fa-spotify"></i>
+      <i class="fa-brands fa-discord"></i>
+      <i class="fa-brands fa-youtube"></i>
+    </div>
+    <div class="hero-inner">
+      <h1>Get <span class="highlight">Premium Subscriptions</span><br/>at Fraction Cost</h1>
+      <p>Access Netflix, Spotify, Disney+, and more through secure shared accounts. Save up to 75% with full premium features.</p>
+      <a href="#services" class="cta"><i class="fa-solid fa-rocket"></i> Get Netflix for $3.99/mo</a>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="section" id="services">
+    <div class="container">
+      <h2 class="section-title">Premium Services Available</h2>
+      
+      <!-- Category Filter -->
+      <div class="filters" id="filters"></div>
+      
+      <!-- Duration Notice -->
+      <div class="duration-notice">
+        <i class="fas fa-info-circle"></i> 
+        Tap “Add to Cart” on any service to pick the duration that fits you. Prices update instantly inside the popup.
+      </div>
+      
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section hiw" id="how">
+    <div class="container">
+      <h2 class="section-title" style="color:#1d123d">How Clicksplore Works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <h3><i class="fa-solid fa-mouse-pointer"></i> Choose Your Service</h3>
+          <p>Pick streaming, music, software, or VPN – we've got you covered.</p>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <h3><i class="fa-solid fa-credit-card"></i> Secure Checkout</h3>
+          <p>Pay safely. Your payment is encrypted and protected.</p>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <h3><i class="fa-solid fa-rocket"></i> Instant Access</h3>
+          <p>Start enjoying your premium plan within minutes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="section testimonials" id="testimonials">
+    <div class="container">
+      <h2 class="section-title">What Our Users Say</h2>
+      <div class="quote">
+        <p style="font-size:1.15rem;font-style:italic;max-width:800px;margin:0 auto 10px">"Clicksplore saved me over $200 this year! The setup was instant and everything works perfectly."</p>
+        <div style="font-weight:800">– Sarah M., Premium User</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BADGES -->
+  <section class="section badges">
+    <div class="container">
+      <h2 class="section-title">Why Trust Clicksplore?</h2>
+      <div class="badges-grid">
+        <div class="badge"><i class="fa-solid fa-shield-halved"></i> SSL Secured</div>
+        <div class="badge"><i class="fa-solid fa-lock"></i> Secure Payments</div>
+        <div class="badge"><i class="fa-solid fa-arrows-rotate"></i> 30-Day Refund</div>
+        <div class="badge"><i class="fa-solid fa-headset"></i> 24/7 Support</div>
+        <div class="badge"><i class="fa-solid fa-users"></i> 50k+ Users</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer id="footer">
+    <div class="container">
+      <div class="links">
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+        <a href="contact.html">Support</a>
+        <a href="about.html">About Us</a>
+        <a href="faq.html">FAQ</a>
+      </div>
+      <p>© 2025 Clicksplore. All rights reserved. | Secure, Affordable, Trusted.</p>
+    </div>
+  </footer>
+
+
+  <!-- SEARCH OVERLAY -->
+  <div class="search" id="search">
+    <div class="search-box">
+      <div style="display:flex;gap:10px;align-items:center">
+        <input id="searchInput" class="search-input" placeholder="Search for services, software, subscriptions…" />
+        <button class="primary" id="searchGo"><i class="fa-solid fa-search"></i> Search</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGIN / SIGNUP -->
+  <div class="modal" id="authModal">
+    <div class="modal-card">
+      <h3 id="authTitle">Login to Clicksplore</h3>
+      <form class="form" id="authForm">
+        <input class="input" type="email" id="authEmail" placeholder="Email address" required />
+        <input class="input" type="text" id="authName" placeholder="Full name" style="display:none" />
+        <input class="input" type="password" id="authPass" placeholder="Password" required />
+        <button class="primary" type="submit" id="authSubmit"><i class="fa-solid fa-right-to-bracket"></i> Continue</button>
+      </form>
+      <div style="margin-top:10px;font-size:.92rem"><span id="authSwitchText">Don't have an account?</span> <a class="link" id="switchAuth">Create one</a></div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"><i class="fa-solid fa-circle-info"></i><span id="toastMsg">Hello</span></div>
+
+  <!-- WhatsApp Chat FAB -->
+  <a class="whatsapp-fab"
+     href="https://wa.me/213555000111?text=Hi%20Clicksplore%2C%20I%20need%20help%20with%20my%20order."
+     target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+    <i class="fa-brands fa-whatsapp"></i>
+  </a>
+
+<script>
+  /* =========================
+   Frontend + Supabase wiring with Duration Pricing - FIXED
+   ========================= */
+const state = {
+  user: null,
+  subscriptions: [],
+  subCategories: [],
+  cart: [],
+  category: 'all',
+  isSignup: false,
+  authCheckInProgress: false,
+  sessionRefreshTimer: null,
+  searchResults: [],
+  isSearching: false,
+  searchQuery: '',
+  currency: 'usdt'
+};
+
+const $ = (s, root = document) => root.querySelector(s);
+const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
+// Use environment variable or fallback to relative path
+const API_BASE = (window.location.protocol === 'file:') ? 'http://localhost:3000' : API_BASE_CONFIG;
+
+document.addEventListener('DOMContentLoaded', init);
+
+async function init() {
+  // Ensure Supabase is available
+  if (typeof window.supabase === 'undefined') {
+    console.error('Supabase client not found. Check configuration.');
+    toast('Supabase not configured');
+    return;
+  }
+
+  // Restore cart from localStorage (pre-login)
+  try { 
+    const c = localStorage.getItem('click_cart'); 
+    if (c) state.cart = JSON.parse(c); 
+  } catch (e) { 
+    console.error('Error parsing cart from localStorage:', e);
+  }
+
+  // Enhanced session restoration with priority
+  try {
+    // First try to get user from cookie (client-side)
+    const cookieUser = getUserFromCookie();
+    const base = API_BASE;
+    
+    // Then try server session
+    let serverSessionValid = false;
+    try {
+      const res = await fetch(`${base}/api/profile`, { 
+        method: 'GET', 
+        credentials: 'include',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+      });
+      
+      if (res.ok) {
+        const { user, profile } = await res.json();
+        state.user = { ...user, ...profile };
+        serverSessionValid = true;
+        console.log('Session restored from server');
+      }
+    } catch (fetchError) {
+      console.warn('Server session check failed:', fetchError.message);
+    }
+    
+    // If server session failed but we have a cookie user, use that
+    if (!serverSessionValid && cookieUser) {
+      state.user = cookieUser;
+      console.log('Session restored from cookie');
+      
+      // Try to refresh the server session in the background
+      setTimeout(() => attemptSessionRefresh(), 1000);
+    }
+    
+    // Finally fallback to Supabase
+    if (!state.user) {
+      const { data: { session }, error } = await window.supabase.auth.getSession();
+      if (session && !error) {
+        state.user = session.user;
+        console.log('Session restored from Supabase client');
+        await ensureUserProfile();
+      }
+    }
+    
+    // Start session monitoring
+    startSessionMonitoring();
+    
+  } catch (e) { 
+    console.error('Session initialization error:', e); 
+  }
+
+  // Listen for Supabase auth state changes
+  window.supabase.auth.onAuthStateChange(async (event, session) => {
+    console.log('Auth state changed:', event, session?.user?.email);
+    
+    if (session?.user) {
+      state.user = session.user;
+      await ensureUserProfile();
+      await loadUserCart();
+    } else {
+      // Only clear if this is a signout event, not just session refresh
+      if (event === 'SIGNED_OUT') {
+        state.user = null;
+        state.cart = [];
+        persist('click_cart', []);
+      }
+    }
+    
+    paintUser();
+    paintCartCount();
+    renderProducts();
+  });
+
+  // UI listeners
+  setupEventListeners();
+  paintUser();
+  paintCartCount();
+
+  // Currency toggle listener
+  $('#currencyToggle')?.addEventListener('click', toggleCurrency);
+
+  // Load core data
+  await loadSubscriptions();
+  buildCategoryFilters();
+  buildNavCategories();
+  renderProducts();
+
+  // If user logged in, hydrate cart from DB
+  if (state.user) await loadUserCart();
+
+  // Initialize language
+  //const savedLang = localStorage.getItem('click_lang') || 'en';
+  //changeLanguage(savedLang);
+
+  // Initialize currency from localStorage
+  const savedCurrency = localStorage.getItem('click_currency') || 'usdt';
+  state.currency = savedCurrency;
+  updateCurrencyUI();
+}
+
+// Currency toggle function
+function toggleCurrency() {
+  state.currency = state.currency === 'usdt' ? 'da' : 'usdt';
+  localStorage.setItem('click_currency', state.currency);
+  updateCurrencyUI();
+  renderProducts();
+  // Also update cart modal if it's open
+  const cartModal = document.querySelector('.modal-card');
+  if (cartModal && cartModal.style.display !== 'none') {
+    updateCartModalView();
+  }
+}
+
+function updateCurrencyUI() {
+  const label = $('#currencyLabel');
+  if (label) {
+    label.textContent = state.currency.toUpperCase();
+  }
+  const toggle = $('#currencyToggle');
+  if (toggle) {
+    toggle.style.background = state.currency === 'da' 
+      ? 'linear-gradient(135deg, rgba(255,107,107,0.15), rgba(255,107,107,0.05))'
+      : 'rgba(255,255,255,.06)';
+  }
+}
+
+// Enhanced session monitoring
+function startSessionMonitoring() {
+  // Clear any existing timer
+  if (state.sessionRefreshTimer) {
+    clearInterval(state.sessionRefreshTimer);
+  }
+  
+  // Check session every 5 minutes
+  state.sessionRefreshTimer = setInterval(async () => {
+    if (state.user && !state.authCheckInProgress) {
+      await checkAndRefreshSession();
+    }
+  }, 5 * 60 * 1000); // 5 minutes
+}
+
+// Enhanced session check and refresh
+async function checkAndRefreshSession() {
+  if (state.authCheckInProgress) return;
+  
+  state.authCheckInProgress = true;
+  const refreshModal = document.getElementById('sessionRefreshModal');
+  
+  try {
+    // Show refreshing modal if page is visible
+    if (document.visibilityState === 'visible') {
+      refreshModal?.classList.add('show');
+    }
+    
+    // Try server session refresh first
+    const serverRefreshed = await attemptSessionRefresh();
+    
+    if (!serverRefreshed) {
+      // Fallback to Supabase refresh
+      const { data: { session }, error } = await window.supabase.auth.refreshSession();
+      if (session && !error) {
+        state.user = session.user;
+        setUserCookie(state.user);
+        console.log('Session refreshed via Supabase');
+      } else {
+        // If both methods fail, try to restore from cookie
+        const cookieUser = getUserFromCookie();
+        if (cookieUser) {
+          state.user = cookieUser;
+          console.log('Session restored from cookie after refresh failure');
+        } else {
+          // Complete session loss - soft logout
+          await softLogout();
+        }
+      }
+    }
+    
+  } catch (error) {
+    console.error('Session refresh error:', error);
+    // On error, try to maintain the existing session
+    const cookieUser = getUserFromCookie();
+    if (cookieUser) state.user = cookieUser;
+  } finally {
+    state.authCheckInProgress = false;
+    refreshModal?.classList.remove('show');
+    paintUser();
+  }
+}
+
+async function attemptSessionRefresh() {
+  const base = API_BASE;
+  try {
+    const refreshRes = await fetch(`${base}/api/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (refreshRes.ok) {
+      const { user, profile } = await refreshRes.json();
+      state.user = { ...user, ...profile };
+      setUserCookie(state.user);
+      console.log('Session refreshed successfully via server');
+      return true;
+    }
+  } catch (e) {
+    console.warn('Session refresh failed:', e.message);
+  }
+  return false;
+}
+
+function setupEventListeners() {
+  window.addEventListener('scroll', () => {
+    const navbar = $('#navbar');
+    if (!navbar) return;
+    if (window.scrollY > 96) navbar.classList.add('scrolled'); 
+    else navbar.classList.remove('scrolled');
+  });
+
+  $('#searchBtn')?.addEventListener('click', () => $('#search').classList.add('show'));
+  $('#searchGo')?.addEventListener('click', doSearch);
+  $('#search')?.addEventListener('click', (e) => { 
+    if (e.target.id === 'search') $('#search').classList.remove('show'); 
+  });
+  $('#searchInput')?.addEventListener('keydown', (e) => { 
+    if (e.key === 'Enter') doSearch(); 
+  });
+
+  // Language menu
+  $('#langBtn')?.addEventListener('click', () => $('#langMenu').classList.toggle('show'));
+  $$('#langMenu .dropdown-item').forEach(el => {
+    el.addEventListener('click', (e) => { 
+      e.preventDefault();
+      const lang = el.dataset.lang; 
+      changeLanguage(lang);
+    });
+  });
+
+  $('#catsBtn')?.addEventListener('click', () => $('#catsMenu').classList.toggle('show'));
+}
+
+/* ============= Duration Filter Functionality ============= */
+
+function getPrimaryPricing(product) {
+  const options = buildDurationOptions(product);
+  return options[0] || { duration: 1, price: product.our_price || 0, discount_percent: 0 };
+}
+
+function getDurationLabel(duration) {
+  const key = duration === 1 ? '1_month' : 'x_months';
+  const args = duration === 1 ? {} : { count: duration };
+  const translated = translate(key, args);
+  if (!translated || translated === key) {
+    return duration === 1 ? '1 Month' : `${duration} Months`;
+  }
+  return translated;
+}
+
+function getPriceForDuration(product, duration) {
+  const target = buildDurationOptions(product).find(opt => Number(opt.duration) === Number(duration));
+  if (target) {
+    const price = Number(target.price ?? target.duration_price ?? product.our_price ?? 0);
+    return {
+      price,
+      discount_percent: target.discount_percent || 0,
+      available: true
+    };
+  }
+  if (Number(duration) === 1) {
+    return {
+      price: Number(product.our_price || 0),
+      discount_percent: 0,
+      available: true
+    };
+  }
+  return { price: 0, discount_percent: 0, available: false };
+}
+
+function getProductImage(product) {
+  return (product.product_pic || product.product_image || '').trim();
+}
+
+/* ============= Products ============= */
+
+// Load subscriptions from server
+async function loadSubscriptions() {
+  try {
+    // For server-based
+    if (window.location.protocol !== 'file:') {
+      const response = await fetch('/api/subscriptions', {
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      if (response.ok) {
+        state.subscriptions = await response.json();
+        console.log('Loaded subscriptions:', state.subscriptions.map(s => ({
+          id: s.id, 
+          name: s.name, 
+          has_duration_pricing: !!s.duration_pricing && s.duration_pricing.length > 0
+        })));
+      } else {
+        throw new Error(`HTTP ${response.status}: Failed to load subscriptions`);
+      }
+    } 
+    // For client-side only (fallback)
+    else {
+      const { data, error } = await window.supabase
+        .from('subscription_services')
+        .select('*')
+        .eq('is_active', true);
+        
+      if (error) throw error;
+      state.subscriptions = data || [];
+      
+      // Load duration pricing for each service
+      for (let service of state.subscriptions) {
+        const { data: pricing, error: priceError } = await window.supabase
+          .from('subscription_duration_prices')
+          .select('*')
+          .eq('service_id', service.id)
+          .eq('is_active', true);
+          
+        if (!priceError && pricing && pricing.length > 0) {
+          service.duration_pricing = pricing;
+        } else {
+          // No duration pricing - service only supports 1-month
+          service.duration_pricing = [];
+        }
+      }
+    }
+    
+    // Extract categories
+    const cats = Array.from(new Set(state.subscriptions.map(s => (s.category || '').trim()).filter(Boolean)));
+    state.subCategories = cats;
+  } catch (error) {
+    console.error('Load subscriptions error:', error);
+    toast(translate('failed_load_products'));
+    state.subscriptions = [];
+    state.subCategories = [];
+  }
+}
+
+// Modify renderProducts to accept a products parameter
+function renderProducts(products = null) {
+  const grid = document.getElementById('grid');
+  if (!grid) return;
+  
+  // Use the provided products array or filter based on category
+  const filteredProducts = products !== null ? 
+    products : 
+    (state.category === 'all' 
+      ? state.subscriptions 
+      : state.subscriptions.filter(p => p.category === state.category));
+  
+  if (filteredProducts.length === 0) {
+    grid.innerHTML = `<div class="card" style="grid-column:1/-1;text-align:center">
+      <div class="icon"><i class="fa-solid fa-box-open"></i></div>
+      <h3>${translate('no_services')}</h3>
+      <p class="desc">${translate('try_another_category')}</p>
+    </div>`;
+    return;
+  }
+  
+  // Filter products that support the selected duration
+  const availableProducts = filteredProducts.filter(Boolean);
+  
+  // Clear the grid first
+  grid.innerHTML = '';
+  
+  // Show notice if some products are filtered out
+  if (availableProducts.length < filteredProducts.length) {
+    const hiddenCount = filteredProducts.length - availableProducts.length;
+    grid.innerHTML += `<div class="duration-notice" style="grid-column:1/-1;margin-bottom:20px;">
+      <i class="fas fa-info-circle"></i> 
+      ${translate('duration_only_1_month', {count: hiddenCount})}
+    </div>`;
+  }
+  
+  // Add search results header if we're showing search results
+  if (products !== null && products.length > 0) {
+    grid.innerHTML += `
+      <div class="search-results-header" style="grid-column:1/-1;text-align:center;margin-bottom:20px;padding:15px;background:linear-gradient(135deg, rgba(122, 92, 255, 0.1), rgba(176, 92, 255, 0.1));border-radius:12px;border-left:4px solid var(--hot)">
+        <h3 style="margin-bottom:8px;color:#333;">
+          <i class="fa-solid fa-search" style="margin-right:8px;"></i>
+          ${translate('search_results')}
+        </h3>
+        <p style="color:#666;margin:0;">
+          ${translate('search_found', {count: products.length})}
+          <button onclick="clearSearch()" style="margin-left:12px;padding:4px 12px;background:rgba(122, 92, 255, 0.2);border:none;border-radius:16px;color:#7a5cff;cursor:pointer;font-size:0.85rem;">
+            <i class="fa-solid fa-times"></i> ${translate('search_clear')}
+          </button>
+        </p>
+      </div>
+    `;
+  }
+  
+  // Render the products
+  availableProducts.forEach(product => {
+    const primaryPricing = getPrimaryPricing(product);
+    const productImage = getProductImage(product);
+    
+    const durationLabel = getDurationLabel(primaryPricing.duration);
+    const rawPrice = Number(primaryPricing.price || 0);
+    const convertedPrice = state.currency === 'da' ? rawPrice * 230 : rawPrice;
+    const durationPrice = convertedPrice.toFixed(2);
+    const rawComparison = product.original_price ? Number(product.original_price) * Number(primaryPricing.duration || 1) : null;
+    const convertedComparison = rawComparison && state.currency === 'da' ? rawComparison * 230 : rawComparison;
+    const comparisonPrice = convertedComparison ? convertedComparison.toFixed(2) : '';
+    const discount = primaryPricing.discount_percent || 0;
+    
+    const media = productImage ? `
+        <div class="icon product-thumb">
+          <img src="${escapeAttr(productImage)}" alt="${escapeHtml(product.name || 'Service image')}">
+        </div>
+      ` : `
+        <div class="icon">
+          <i class="${product.icon || 'fa-solid fa-crown'}"></i>
+        </div>
+      `;
+
+    grid.innerHTML += `
+      <div class="card" data-id="${product.id}">
+        ${media}
+        <h3>${escapeHtml(product.name || 'Unnamed Service')}</h3>
+        <p class="desc">${escapeHtml(product.description || 'Premium access with full features')}</p>
+        
+        <div class="price-wrap">
+          <div class="price">${durationPrice}<span style="font-size:.8rem;font-weight:700">/${durationLabel}</span> ${state.currency.toUpperCase()}</div>
+          ${comparisonPrice ? `
+            <div class="original">${comparisonPrice} ${translate('regular_price')}</div>
+          ` : ''}
+          ${discount > 0 ? `<div class="save">${translate('save')} ${discount}%</div>` : ''}
+        </div>
+        
+        <div class="meta">
+          ${product.is_shared ? `<span><i class="fa-solid fa-users"></i> ${translate('shared_account')}</span>` : `<span><i class="fa-solid fa-user"></i> ${translate('private_account')}</span>`}
+          ${product.max_users ? `<span><i class="fa-solid fa-user-group"></i> ${translate('max_users', {count: product.max_users})}</span>` : ''}
+        </div>
+        
+        <button class="btn" onclick="promptDuration('${product.id}')" 
+          ${!state.user ? `disabled title="${translate('please_login')}"` : ''}>
+          <i class="fa-solid fa-cart-plus"></i> ${translate('add_to_cart')}
+        </button>
+      </div>
+    `;
+  });
+  
+  // If no products available for selected duration, show message
+  if (availableProducts.length === 0) {
+    grid.innerHTML = `<div class="card" style="grid-column:1/-1;text-align:center">
+      <div class="icon"><i class="fa-solid fa-calendar-times"></i></div>
+      <h3>${translate('no_services')}</h3>
+      <p class="desc">${translate('try_another_category')}</p>
+    </div>`;
+  }
+}
+
+// Update your doSearch function to use the modified renderProducts
+function doSearch() {
+  const q = ($('#searchInput')?.value || '').trim().toLowerCase();
+  if (!q) { 
+    toast(translate('search_prompt')); 
+    return; 
+  }
+  
+  const results = state.subscriptions.filter(s =>
+    (s.name || '').toLowerCase().includes(q) ||
+    (s.description || '').toLowerCase().includes(q) ||
+    ((s.category || '').toLowerCase().includes(q))
+  );
+  
+  $('#search').classList.remove('show');
+  $('#searchInput').value = ''; // Clear the search input
+  
+  // Pass the search results to renderProducts
+  renderProducts(results);
+  
+  document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
+  toast(results.length ? 
+    translate('search_results_count', {count: results.length, query: q}) : 
+    translate('no_results', {query: q})
+  );
+}
+
+// Also update your category filter functions to call renderProducts without parameters
+function buildCategoryFilters() {
+  const filters = $('#filters');
+  if (!filters) return;
+  filters.innerHTML = '';
+
+  // All
+  const allCat = document.createElement('button');
+  allCat.className = 'chip active';
+  allCat.innerHTML = `<i class="fa-solid fa-th"></i> All Services`;
+  allCat.addEventListener('click', () => { 
+    $$('.chip').forEach(x => x.classList.remove('active'));
+    allCat.classList.add('active');
+    state.category = 'all';
+    renderProducts(); // Call without parameters
+  });
+  filters.appendChild(allCat);
+
+  // Build from subscription categories
+  state.subCategories.forEach(name => {
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.innerHTML = `<i class="fa-solid fa-tags"></i> ${escapeHtml(name)}`;
+    b.addEventListener('click', () => { 
+      $$('.chip').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      state.category = name;
+      renderProducts(); // Call without parameters
+      document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
+    });
+    filters.appendChild(b);
+  });
+
+  // Add currency toggle at the end
+  // const currencyToggle = document.createElement('button');
+  // currencyToggle.className = 'chip';
+  // currencyToggle.id = 'currencyToggle';
+  // currencyToggle.title = 'Toggle Currency';
+  // currencyToggle.innerHTML = `<i class="fa-solid fa-coins" style="margin-right:6px;"></i><span id="currencyLabel">${state.currency.toUpperCase()}</span>`;
+  // currencyToggle.addEventListener('click', toggleCurrency);
+  // currencyToggle.style.marginLeft = 'auto';
+  // filters.appendChild(currencyToggle);
+}
+
+/* ============= Cart ============= */
+
+// Add to cart with selected duration - FIXED
+async function addToCart(serviceId, duration) {
+  if (!state.user) {
+    toast('Please login to add items to cart');
+    openAuth(false);
+    return;
+  }
+  
+  const product = state.subscriptions.find(p => p.id == serviceId);
+  if (!product) {
+    toast('Product not found');
+    return;
+  }
+  
+  const pricing = getPriceForDuration(product, duration);
+  
+  try {
+    // For server-based auth - IMPROVED ERROR HANDLING
+    if (window.location.protocol !== 'file:') {
+      const base = API_BASE;  // Use relative path for same origin
+      const response = await fetch(`${base}/api/cart`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          service_id: parseInt(serviceId),
+          quantity: 1,
+          duration: duration,
+          duration_price: pricing.price
+        })
+      });
+      
+      const responseData = await response.json();
+      
+      if (!response.ok) {
+        // Handle specific error cases
+        if (response.status === 401) {
+          toast('Session expired. Please login again.');
+          state.user = null;
+          paintUser();
+          openAuth(false);
+          return;
+        }
+        throw new Error(responseData.error || `HTTP ${response.status}: Failed to add to cart`);
+      }
+      
+      const cartItem = responseData;
+      // Update local state
+      const existingIndex = state.cart.findIndex(item => 
+        item.service_id == serviceId && item.duration === duration);
+      
+      if (existingIndex >= 0) {
+        state.cart[existingIndex] = cartItem;
+      } else {
+        state.cart.push(cartItem);
+      }
+    } 
+    // For client-side only (fallback)
+    else {
+      const { data, error } = await window.supabase
+        .from('cart_items')
+        .upsert({
+          user_id: state.user.id,
+          service_id: parseInt(serviceId),
+          quantity: 1,
+          duration: duration,
+          duration_price: pricing.price
+        }, { onConflict: 'user_id,service_id,duration' })
+        .select()
+        .single();
+        
+      if (error) throw error;
+      
+      // Update local state
+      const existingIndex = state.cart.findIndex(item => 
+        item.service_id == serviceId && item.duration === duration);
+      
+      if (existingIndex >= 0) {
+        state.cart[existingIndex] = data;
+      } else {
+        state.cart.push(data);
+      }
+    }
+    
+    persist('click_cart', state.cart);
+    toast(`Added ${product.name} to cart`);
+    paintCartCount();
+    
+  } catch (error) {
+    console.error('Add to cart error:', error);
+    toast(error.message || 'Failed to add to cart');
+  }
+}
+
+function openDurationModal(product, durations) {
+  const modal = document.createElement('div');
+  modal.className = 'modal show';
+  const content = document.createElement('div');
+  content.className = 'duration-modal-card';
+  content.innerHTML = `
+    <div class="duration-modal-header">
+      <div>
+        <small style="color:#7a7a8c;font-weight:700;text-transform:uppercase;letter-spacing:.08em;">Choose duration</small>
+        <h3>${escapeHtml(product.name)}</h3>
+      </div>
+      <button class="duration-modal-close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="duration-options"></div>
+    <div class="duration-modal-footer">
+      <button class="ghost-btn" id="cancelDuration">${translate('cancel') || 'Cancel'}</button>
+      <button class="primary-btn" id="confirmDuration" disabled>
+        <i class="fa-solid fa-cart-plus"></i> ${translate('add_to_cart')}
+      </button>
+    </div>
+  `;
+
+  const optionsWrap = content.querySelector('.duration-options');
+  let selected = null;
+
+  durations.forEach(option => {
+    const price = option.price ?? option.duration_price ?? product.our_price ?? 0;
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'duration-option';
+    const label = getDurationLabel(option.duration);
+    el.innerHTML = `
+      <div>
+        <h4>${label}</h4>
+        <small>${option.discount_percent ? `${translate('save')} ${option.discount_percent}%` : translate('total')}</small>
+      </div>
+      <span>${Number(price).toFixed(2)}</span>
+    `;
+    el.addEventListener('click', () => {
+      optionsWrap.querySelectorAll('.duration-option').forEach(btn => btn.classList.remove('active'));
+      el.classList.add('active');
+      selected = option;
+      content.querySelector('#confirmDuration').disabled = false;
+    });
+    optionsWrap.appendChild(el);
+  });
+
+  if (!durations.length) {
+    optionsWrap.innerHTML = `<p style="text-align:center;color:#777">${translate('no_services_duration', { duration: 1 })}</p>`;
+  }
+
+  content.querySelector('#cancelDuration').addEventListener('click', close);
+  content.querySelector('.duration-modal-close').addEventListener('click', close);
+  modal.addEventListener('click', e => { if (e.target === modal) close(); });
+
+  content.querySelector('#confirmDuration').addEventListener('click', async () => {
+    if (!selected) return;
+    await addToCart(product.id, selected.duration ?? 1);
+    close();
+  });
+
+  function close() {
+    modal.remove();
+  }
+
+  modal.appendChild(content);
+  document.body.appendChild(modal);
+}
+
+function promptDuration(serviceId) {
+  if (!state.user) {
+    openAuth(false, translate('please_login'));
+    return;
+  }
+
+  const product = state.subscriptions.find(s => String(s.id) === String(serviceId));
+  if (!product) {
+    toast('Service unavailable');
+    return;
+  }
+
+  const durations = buildDurationOptions(product);
+  openDurationModal(product, durations);
+}
+
+function buildDurationOptions(product) {
+  const desiredDurations = [1, 3, 6, 12];
+  const discountGuess = { 1: 0, 3: 0.07, 6: 0.15, 12: 0.25 };
+  const basePrice = Number(product.our_price || 0);
+  const optionMap = new Map();
+
+  if (Array.isArray(product.duration_pricing) && product.duration_pricing.length) {
+    product.duration_pricing.forEach(({ duration, price, discount_percent }) => {
+      if (!duration) return;
+      const normalizedPrice = Number(price ?? 0);
+      optionMap.set(Number(duration), {
+        duration: Number(duration),
+        price: Number.isFinite(normalizedPrice) ? normalizedPrice : 0,
+        discount_percent: discount_percent || 0
+      });
+    });
+  }
+
+  desiredDurations.forEach(duration => {
+    if (!optionMap.has(duration)) {
+      const discount = discountGuess[duration] ?? 0;
+      const computed = basePrice * duration * (1 - discount);
+      const computedPrice = Number.isFinite(computed) ? Number(computed.toFixed(2)) : 0;
+      optionMap.set(duration, {
+        duration,
+        price: computedPrice,
+        discount_percent: Math.round(discount * 100)
+      });
+    }
+  });
+
+  return Array.from(optionMap.values())
+    .filter(opt => Number(opt.duration) > 0)
+    .sort((a, b) => a.duration - b.duration);
+}
+
+// Load user cart from server - FIXED
+async function loadUserCart() {
+  if (!state.user) return;
+  
+  try {
+    // For server-based auth
+    if (window.location.protocol !== 'file:') {
+      const base = API_BASE;  // Use relative path
+      const response = await fetch(`${base}/api/cart`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        state.cart = await response.json();
+      } else if (response.status === 401) {
+        console.log('Unauthorized access to cart, user may need to re-login');
+        // Don't throw error, just keep empty cart
+        state.cart = [];
+      } else {
+        throw new Error(`HTTP ${response.status}: Failed to load cart`);
+      }
+    } 
+    // For client-side only (fallback)
+    else {
+      const { data, error } = await window.supabase
+        .from('cart_items')
+        .select('*')
+        .eq('user_id', state.user.id);
+        
+      if (!error) {
+        state.cart = data || [];
+      } else {
+        console.error('Load cart error:', error);
+      }
+    }
+    
+    persist('click_cart', state.cart);
+    paintCartCount();
+  } catch (error) {
+    console.error('Load cart error:', error);
+    // Don't show error to user for cart loading failure
+  }
+}
+
+// Paint cart count badge
+function paintCartCount() {
+  const cartCount = document.getElementById('cartCount');
+  if (!cartCount) return;
+  
+  const totalItems = state.cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  
+  if (totalItems > 0) {
+    cartCount.textContent = totalItems;
+    cartCount.style.display = 'grid';
+  } else {
+    cartCount.style.display = 'none';
+  }
+}
+
+// Show cart modal - IMPROVED
+$('#cartBtn')?.addEventListener('click', async () => {
+  if (!state.user) return openAuth(false, 'Please login to view your cart');
+
+  const wrap = document.createElement('div');
+  wrap.className = 'modal show';
+
+  const total = state.cart.reduce((s, i) => {
+    const rawPrice = Number(i.duration_price || i.price || 0);
+    const convertedPrice = state.currency === 'da' ? rawPrice * 230 : rawPrice;
+    return s + convertedPrice * (i.quantity || 1);
+  }, 0);
+  const currencySymbol = state.currency === 'da' ? 'DA' : '$';
+  const items = state.cart.map(i => {
+    const product = state.subscriptions.find(p => p.id == i.service_id);
+    const rawPrice = Number(i.duration_price || i.price || 0);
+    const convertedPrice = state.currency === 'da' ? rawPrice * 230 : rawPrice;
+    return `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eee">
+        <div>
+          <strong>${escapeHtml(product?.name || `Service ${i.service_id}`)}</strong><br>
+          <small>${currencySymbol}${convertedPrice.toFixed(2)} for ${i.duration || 1} month(s)</small>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button class="primary" data-dec="${i.id}" style="padding:6px 10px">−</button>
+          <span>${i.quantity || 1}</span>
+          <button class="primary" data-inc="${i.id}" style="padding:6px 10px">+</button>
+          <button class="primary" data-remove="${i.id}" style="background:#ff6b6b;padding:6px 10px">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      </div>`;
+    }).join('') || '<p>Your cart is empty.</p>';
+
+  wrap.innerHTML = `<div class="modal-card">
+    <h3>Your Cart</h3>
+    <div id="cartItemsList" style="max-height:50vh;overflow:auto;margin-top:8px">${items}</div>
+    <div style="margin-top:14px;text-align:center">
+      <h4>Total: <span id="cartTotal">${currencySymbol}${total.toFixed(2)}</span></h4>
+      <button class="primary" id="goCheckout"><i class="fa-solid fa-credit-card"></i> Proceed to Checkout</button>
+    </div>
+  </div>`;
+
+  wrap.addEventListener('click', (e) => { if (e.target === wrap) wrap.remove(); });
+  document.body.appendChild(wrap);
+
+  function bindCartItemButtons(container) {
+    container.querySelectorAll('[data-remove]').forEach(btn =>
+      btn.addEventListener('click', async () => {
+        const item = state.cart.find(x => String(x.id) === String(btn.dataset.remove));
+        if (!item) return;
+        try {
+          const base = API_BASE;
+          const res = await fetch(`${base}/api/cart/${encodeURIComponent(item.id)}`, {
+            method: 'DELETE', 
+            credentials: 'include',
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          if (!res.ok) { 
+            const d = await res.json().catch(() => ({})); 
+            throw new Error(d.error || 'Failed to remove'); 
+          }
+          state.cart = state.cart.filter(x => String(x.id) !== String(item.id));
+          persist('click_cart', state.cart);
+          paintCartCount();
+          toast('Removed from cart');
+          updateCartModalView();
+        } catch (e) { 
+          console.error(e); 
+          toast(e.message || 'Failed to remove'); 
+        }
+      })
+    );
+    
+    container.querySelectorAll('[data-inc]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const item = state.cart.find(x => String(x.id) === String(btn.dataset.inc));
+        if (!item) return;
+        const newQty = Math.min(10, (item.quantity || 1) + 1);
+        try {
+          const base = API_BASE;
+          const res = await fetch(`${base}/api/cart/${encodeURIComponent(item.id)}`, {
+            method: 'PUT', 
+            credentials: 'include', 
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ quantity: newQty })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Failed to update');
+          item.quantity = data.quantity || newQty;
+          persist('click_cart', state.cart);
+          updateCartModalView();
+        } catch (e) { 
+          console.error(e); 
+          toast(e.message || 'Failed to update'); 
+        }
+      });
+    });
+    
+    container.querySelectorAll('[data-dec]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const item = state.cart.find(x => String(x.id) === String(btn.dataset.dec));
+        if (!item) return;
+        const newQty = Math.max(1, (item.quantity || 1) - 1);
+        try {
+          const base = API_BASE;
+          const res = await fetch(`${base}/api/cart/${encodeURIComponent(item.id)}`, {
+            method: 'PUT', 
+            credentials: 'include', 
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ quantity: newQty })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Failed to update');
+          item.quantity = data.quantity || newQty;
+          persist('click_cart', state.cart);
+          updateCartModalView();
+        } catch (e) { 
+          console.error(e); 
+          toast(e.message || 'Failed to update'); 
+        }
+      });
+    });
+  }
+
+  function updateCartModalView() {
+    const list = document.getElementById('cartItemsList');
+    const totalEl = document.getElementById('cartTotal');
+    if (!list || !totalEl) return;
+    
+    const itemsHtml = state.cart.map(i => {
+      const product = state.subscriptions.find(p => p.id == i.service_id);
+      const rawPrice = Number(i.duration_price || i.price || 0);
+      const convertedPrice = state.currency === 'da' ? rawPrice * 230 : rawPrice;
+      const currencySymbol = state.currency === 'da' ? 'DA' : '$';
+      return `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eee">
+          <div>
+            <strong>${escapeHtml(product?.name || `Service ${i.service_id}`)}</strong><br>
+            <small>${currencySymbol}${convertedPrice.toFixed(2)} for ${i.duration || 1} month(s)</small>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button class="primary" data-dec="${i.id}" style="padding:6px 10px">−</button>
+            <span>${i.quantity || 1}</span>
+            <button class="primary" data-inc="${i.id}" style="padding:6px 10px">+</button>
+            <button class="primary" data-remove="${i.id}" style="background:#ff6b6b;padding:6px 10px">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </div>`;
+    }).join('') || '<p>Your cart is empty.</p>';
+    
+    list.innerHTML = itemsHtml;
+    const totalVal = state.cart.reduce((s, i) => {
+      const rawPrice = Number(i.duration_price || i.price || 0);
+      const convertedPrice = state.currency === 'da' ? rawPrice * 230 : rawPrice;
+      return s + convertedPrice * (i.quantity || 1);
+    }, 0);
+    const currencySymbol = state.currency === 'da' ? 'DA' : '$';
+    totalEl.textContent = `${currencySymbol}${totalVal.toFixed(2)}`;
+    bindCartItemButtons(list);
+  }
+
+  // Initial bind for existing buttons
+  bindCartItemButtons(wrap);
+
+  $('#goCheckout')?.addEventListener('click', () => {
+    if (state.cart.length === 0) {
+      toast('Your cart is empty');
+      return;
+    }
+    toast('Redirecting to checkout...');
+    window.location.href = 'checkout.html';
+  });
+});
+
+/* ============= Categories ============= */
+
+function buildCategoryFilters() {
+  const filters = $('#filters');
+  if (!filters) return;
+  filters.innerHTML = '';
+
+  // All
+  const allCat = document.createElement('button');
+  allCat.className = 'chip active';
+  allCat.innerHTML = `<i class="fa-solid fa-th"></i> All Services`;
+  allCat.addEventListener('click', () => { 
+    $$('.chip').forEach(x => x.classList.remove('active'));
+    allCat.classList.add('active');
+    state.category = 'all';
+    renderProducts();
+  });
+  filters.appendChild(allCat);
+
+  // Build from subscription categories
+  state.subCategories.forEach(name => {
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.innerHTML = `<i class="fa-solid fa-tags"></i> ${escapeHtml(name)}`;
+    b.addEventListener('click', () => { 
+      $$('.chip').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      state.category = name;
+      renderProducts();
+      document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
+    });
+    filters.appendChild(b);
+  });
+}
+
+function buildNavCategories() {
+  const menu = $('#catsMenu');
+  if (!menu) return;
+  menu.innerHTML = '';
+  
+  // All
+  const all = document.createElement('a');
+  all.className = 'dropdown-item';
+  all.innerHTML = `<i class="fa-solid fa-th"></i> All Services`;
+  all.addEventListener('click', () => {
+    state.category = 'all';
+    $$('.chip').forEach(x => x.classList.remove('active'));
+    $('.chip')?.classList.add('active');
+    renderProducts();
+    menu.classList.remove('show');
+    document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
+  });
+  menu.appendChild(all);
+
+  // From subscriptions
+  state.subCategories.forEach(name => {
+    const a = document.createElement('a');
+    a.className = 'dropdown-item';
+    a.innerHTML = `<i class="fa-solid fa-tags"></i> ${escapeHtml(name)}`;
+    a.addEventListener('click', () => {
+      state.category = name;
+      // sync filter pills
+      $$('.chip').forEach(x => x.classList.remove('active'));
+      const btn = [...document.querySelectorAll('.chip')].find(x => x.textContent.trim().endsWith(name));
+      if (btn) btn.classList.add('active');
+      renderProducts();
+      menu.classList.remove('show');
+      document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
+    });
+    menu.appendChild(a);
+  });
+}
+
+/* ============= Auth + Profile - FIXED ============= */
+
+function paintUser() {
+  const slot = $('#userSlot');
+  if (!slot) return;
+  
+  if (state.user) {
+    const initial = (state.user.full_name || state.user.email || 'U').charAt(0).toUpperCase();
+    slot.innerHTML = `
+      <div style="position:relative;">
+        <button class="icon-btn" id="userBtn" title="Account" style="display:flex; align-items:center; gap:8px; position:relative; z-index:1001;">
+          <span style="font-weight:800">${initial}</span>
+          <i class="fa-solid fa-caret-down" style="font-size:12px;"></i>
+        </button>
+        <div id="userDropdown" style="display:none; position:absolute; right:0; top:100%; width:180px; z-index:1000; background:#fff; border-radius:8px; box-shadow:0 8px 18px rgba(0,0,0,0.15); overflow:hidden; border:1px solid #eee;">
+          <a href="#" id="profileBtn" style="display:flex; align-items:center; gap:8px; padding:10px 12px; color:#333; text-decoration:none; font-size:13px;">
+            <i class="fa-solid fa-user"></i>
+            <span>Profile</span>
+          </a>
+          <button id="accountToggle" style="width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 12px; background:#fff; border:0; border-top:1px solid #f2f2f2; color:#333; font-size:13px; cursor:pointer;">
+            <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-gear"></i> Account</span>
+            <i class="fa-solid fa-chevron-down" style="font-size:11px;"></i>
+          </button>
+          <div id="accountActions" style="display:none; border-top:1px solid #f2f2f2;">
+            <a href="#" id="logoutBtn" style="display:flex; align-items:center; justify-content: space-between; padding:10px 12px; color:#e53935; text-decoration:none; font-size:13px;">
+              <span>Sign Out</span>
+              <i class="fa-solid fa-right-from-bracket" style="font-size:12px;"></i>
+            </a>
+          </div>
+        </div>`;
+    
+    // Toggle dropdown on user button click
+    const userBtn = $('#userBtn');
+    const dropdown = $('#userDropdown');
+    
+    if (userBtn && dropdown) {
+      userBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!slot.contains(e.target)) {
+          dropdown.style.display = 'none';
+        }
+      });
+
+      // Toggle account actions
+      $('#accountToggle')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const box = $('#accountActions');
+        if (box) box.style.display = box.style.display === 'block' ? 'none' : 'block';
+      });
+
+      // Profile
+      $('#profileBtn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.href = 'profile.html';
+      });
+
+      // Handle logout - IMPROVED
+      $('#logoutBtn')?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        try {
+          const base = API_BASE;
+          const response = await fetch(`${base}/api/logout`, { 
+            method: 'POST', 
+            credentials: 'include',
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          
+          if (!response.ok) {
+            console.warn('Logout request failed, but continuing with client cleanup');
+          }
+          
+          // Clear client-side state regardless of server response
+          await softLogout();
+          if (dropdown) dropdown.style.display = 'none';
+          toast('Logged out successfully');
+        } catch (error) {
+          console.error('Logout error:', error);
+          // Still clear client state even if server logout fails
+          await softLogout();
+          toast('Logged out (with errors)');
+        }
+      });
+    }
+  } else {
+    slot.innerHTML = `<button class="icon-btn" id="loginBtn" title="Login"><i class="fa-solid fa-user"></i></button>`;
+    $('#loginBtn')?.addEventListener('click', () => openAuth(false));
+  }
+}
+
+function openAuth(signup = false, note) {
+  state.isSignup = signup;
+  $('#authTitle').textContent = signup ? 'Create Account' : 'Login to Clicksplore';
+  $('#authSubmit').innerHTML = signup ? 
+    '<i class="fa-solid fa-user-plus"></i> Create Account' : 
+    '<i class="fa-solid fa-right-to-bracket"></i> Continue';
+  
+  // Toggle name field and switch text
+  const nameInput = $('#authName');
+  if (nameInput) nameInput.style.display = signup ? 'block' : 'none';
+  
+  $('#authSwitchText').textContent = signup ? 'Already have an account?' : "Don't have an account?";
+  $('#switchAuth').textContent = signup ? 'Log in' : 'Create one';
+  $('#authModal').classList.add('show');
+  
+  if (note) toast(note);
+}
+
+$('#switchAuth')?.addEventListener('click', () => openAuth(!state.isSignup));
+$('#authModal')?.addEventListener('click', (e) => { 
+  if (e.target.id === 'authModal') $('#authModal').classList.remove('show'); 
+});
+
+// FIXED AUTH FORM HANDLER
+$('#authForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = $('#authEmail').value.trim();
+  const password = $('#authPass').value.trim();
+  const full_name = ($('#authName')?.value || '').trim();
+
+  const btn = $('#authSubmit');
+  const oldBtnHtml = btn.innerHTML;
+  btn.disabled = true; 
+  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing…';
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    btn.disabled = false; 
+    btn.innerHTML = oldBtnHtml;
+    return toast('Enter a valid email');
+  }
+  
+  if (password.length < 6) {
+    btn.disabled = false; 
+    btn.innerHTML = oldBtnHtml;
+    return toast('Password must be at least 6 characters');
+  }
+
+  try {
+    if (state.isSignup) {
+      // Signup via backend with better error handling
+      const base = API_BASE;
+      const resp = await fetch(`${base}/api/signup`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ 
+          email, 
+          password, 
+          full_name: full_name || email.split('@')[0],
+          remember_me: true // Request persistent session
+        })
+      });
+      
+      const result = await resp.json();
+      
+      if (!resp.ok) {
+        throw new Error(result.error || `HTTP ${resp.status}: Signup failed`);
+      }
+      
+      // For signup, we might not get a session immediately (email confirmation required)
+      if (result.user) {
+        state.user = result.user;
+        setUserCookie(result.user);
+        document.cookie = `click_remember=true; path=/; max-age=${30*24*60*60}; SameSite=Lax`;
+        await loadUserCart();
+        paintUser();
+        paintCartCount();
+        renderProducts();
+        startSessionMonitoring();
+      } else {
+        paintUser();
+      }
+      
+      $('#authModal').classList.remove('show');
+      toast(result.message || 'Account created! Please check your email for verification.');
+      
+    } else {
+      // Login via backend with improved error handling
+      const base = API_BASE;
+      const resp = await fetch(`${base}/api/login`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ 
+          email, 
+          password,
+          remember_me: true // Request persistent session
+        })
+      });
+      
+      const result = await resp.json();
+      
+      if (!resp.ok) {
+        if (resp.status === 401) {
+          throw new Error('Invalid email or password');
+        }
+        throw new Error(result.error || `HTTP ${resp.status}: Login failed`);
+      }
+      
+      state.user = result.user;
+      setUserCookie(result.user);
+      // Set longer expiration for remember me
+      document.cookie = `click_remember=true; path=/; max-age=${30*24*60*60}; SameSite=Lax`;
+      
+      $('#authModal').classList.remove('show');
+      paintUser();
+      toast('Welcome back!');
+      await loadUserCart();
+      paintCartCount();
+      renderProducts();
+      startSessionMonitoring();
+    }
+  } catch (error) {
+    console.error('Auth error:', error);
+    toast(error.message || 'Authentication failed');
+  } finally {
+    btn.disabled = false; 
+    btn.innerHTML = oldBtnHtml;
+  }
+});
+
+async function ensureUserProfile() {
+  if (!state.user) return;
+  
+  try {
+    const { data, error } = await window.supabase
+      .from('users')
+      .select('*')
+      .eq('id', state.user.id)
+      .maybeSingle();
+
+    if (error) { 
+      console.error('Profile load error:', error); 
+      return; 
+    }
+
+    if (!data) {
+      // Create a minimal profile row
+      const { error: insErr } = await window.supabase
+        .from('users')
+        .insert([{ 
+          id: state.user.id, 
+          email: state.user.email, 
+          full_name: state.user.user_metadata?.full_name || state.user.email.split('@')[0],
+          is_admin: false
+        }]);
+      if (insErr) console.error('Profile create error:', insErr);
+    } else {
+      // Merge user data
+      state.user = { ...state.user, ...data };
+    }
+  } catch (e) {
+    console.error('Profile management error:', e);
+  }
+}
+
+// Enhanced setUserCookie function
+function setUserCookie(user) {
+  try {
+    // Add timestamp for session freshness check
+    const userWithTimestamp = {
+      ...user,
+      lastLogin: new Date().toISOString()
+    };
+    
+    document.cookie = `click_user=${encodeURIComponent(JSON.stringify(userWithTimestamp))}; path=/; max-age=${30*24*60*60}; SameSite=Lax`;
+  } catch (e) {
+    console.error('Error setting user cookie:', e);
+  }
+}
+
+// Enhanced getUserFromCookie function
+function getUserFromCookie() {
+  try {
+    const match = document.cookie.match(/(?:^|; )click_user=([^;]*)/);
+    if (match) {
+      const userData = JSON.parse(decodeURIComponent(match[1]));
+      
+      // Check if we should remember the user
+      const rememberMe = document.cookie.match(/(?:^|; )click_remember=([^;]*)/);
+      if (rememberMe && rememberMe[1] === 'true') {
+        return userData;
+      }
+      
+      // If no remember me flag, check if it's a recent session (last 24 hours)
+      if (userData.lastLogin && (Date.now() - new Date(userData.lastLogin).getTime()) < 24 * 60 * 60 * 1000) {
+        return userData;
+      }
+    }
+  } catch (e) {
+    console.error('Error parsing user cookie:', e);
+  }
+  return null;
+}
+
+// Enhanced logout function
+async function softLogout() {
+  // Clear client-side state but don't force server logout
+  state.user = null;
+  state.cart = [];
+  persist('click_cart', []);
+  clearUserCookie();
+  
+  // Update UI immediately
+  paintUser();
+  paintCartCount();
+  renderProducts();
+  
+  // Stop session monitoring
+  if (state.sessionRefreshTimer) {
+    clearInterval(state.sessionRefreshTimer);
+    state.sessionRefreshTimer = null;
+  }
+}
+
+// Remove user cookie
+function clearUserCookie() {
+  document.cookie = 'click_user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax';
+  document.cookie = 'click_remember=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax';
+}
+
+// Listen for page visibility changes
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && state.user) {
+    // Check session when page becomes visible again
+    setTimeout(() => checkAndRefreshSession(), 1000);
+  }
+});
+
+/* ============= Helpers ============= */
+
+function persist(key, val) { 
+  try { 
+    if (val === null || val === undefined) {
+      localStorage.removeItem(key); 
+    } else {
+      localStorage.setItem(key, JSON.stringify(val)); 
+    }
+  } catch (e) { 
+    console.error('localStorage error:', e); 
+  }
+}
+
+function toast(msg) { 
+  const t = $('#toast'); 
+  if (!t) return;
+  const msgEl = $('#toastMsg');
+  if (msgEl) msgEl.textContent = msg; 
+  t.classList.add('show'); 
+  setTimeout(() => t.classList.remove('show'), 3000); 
+}
+
+function escapeHtml(txt) {
+  return String(txt).replace(/[&<>"']/g, s => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#039;"
+  }[s])); 
+}
+
+function escapeAttr(txt) {
+  return escapeHtml(txt).replace(/\n/g, '');
+}
+
+// Make functions available globally
+window.promptDuration = promptDuration;
+window.addToCart = addToCart;
+</script>
+
+<script>
+// Language Manager - This should be included on every page
+const LanguageManager = {
+  // Initialize language on page load
+  init: function() {
+    // Try to get language from various sources in order of priority
+    let lang = null;
+    
+    // 1. Check URL parameter (highest priority)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('lang')) {
+      lang = urlParams.get('lang');
+    }
+    
+    // 2. Check localStorage
+    if (!lang) {
+      lang = localStorage.getItem('click_lang');
+    }
+    
+    // 3. Check browser language
+    if (!lang) {
+      const browserLang = navigator.language || navigator.userLanguage;
+      if (browserLang.startsWith('ar')) {
+        lang = 'ar';
+      } else {
+        lang = 'en'; // default
+      }
+    }
+    
+    // Apply the language
+    if (translations[lang]) {
+      this.setLanguage(lang, false); // false = don't show toast
+    } else {
+      this.setLanguage('en', false); // fallback to English
+    }
+  },
+  
+  // Set language and persist it
+  setLanguage: function(langCode, showToast = true) {
+    if (!translations[langCode]) return false;
+    
+    // Update state if it exists
+    if (typeof state !== 'undefined') {
+      state.lang = langCode;
+    }
+    
+    // Store in localStorage for persistence across pages
+    localStorage.setItem('click_lang', langCode);
+    
+    // Update UI direction for RTL languages
+    if (langCode === 'ar') {
+      document.documentElement.dir = 'rtl';
+      document.documentElement.lang = 'ar';
+      document.body.classList.add('rtl');
+      document.body.classList.remove('ltr');
+    } else {
+      document.documentElement.dir = 'ltr';
+      document.documentElement.lang = 'en';
+      document.body.classList.add('ltr');
+      document.body.classList.remove('rtl');
+    }
+    
+    // Update all translatable elements if the function exists
+    if (typeof updateUIText !== 'undefined') {
+      updateUIText();
+    }
+    
+    // Update current language indicator
+    const currentLangEl = document.getElementById('currentLang');
+    if (currentLangEl) {
+      currentLangEl.textContent = langCode.toUpperCase();
+    }
+    
+    // Close language menu
+    const langMenu = document.getElementById('langMenu');
+    if (langMenu) {
+      langMenu.classList.remove('show');
+    }
+    
+    // Show notification if requested
+    if (showToast) {
+      const langName = langCode === 'en' ? 'English' : 'العربية';
+      if (typeof toast !== 'undefined') {
+        toast(translate('language_changed', {lang: langName}));
+      }
+    }
+    
+    // Dispatch event so other components can react to language change
+    window.dispatchEvent(new CustomEvent('languageChanged', {
+      detail: { language: langCode }
+    }));
+    
+    return true;
+  },
+  
+  // Function to translate text with placeholders
+  translate: function(key, params = {}) {
+    const lang = localStorage.getItem('click_lang') || 'en';
+    let text = translations[lang][key] || translations['en'][key] || key;
+    
+    // Replace placeholders
+    Object.keys(params).forEach(param => {
+      text = text.replace(`{${param}}`, params[param]);
+    });
+    
+    return text;
+  },
+  
+  // Update navigation links to preserve language
+  updateNavigationLinks: function() {
+    const lang = localStorage.getItem('click_lang') || 'en';
+    if (lang === 'en') return; // Default language doesn't need parameter
+    
+    document.querySelectorAll('a:not([href^="#"]):not([href^="javascript:"]):not([href*="lang="])').forEach(link => {
+      const href = link.getAttribute('href');
+      if (href && !href.includes('lang=')) {
+        const separator = href.includes('?') ? '&' : '?';
+        link.setAttribute('href', `${href}${separator}lang=${lang}`);
+      }
+    });
+  }
+};
+
+// Make LanguageManager available globally
+window.LanguageManager = LanguageManager;
+window.changeLanguage = function(langCode) {
+  return LanguageManager.setLanguage(langCode, true);
+};
+window.translate = LanguageManager.translate;
+
+// Initialize language when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  LanguageManager.init();
+  
+  // Update navigation links after a short delay to ensure all are loaded
+  setTimeout(() => {
+    LanguageManager.updateNavigationLinks();
+  }, 100);
+});
+
+// Listen for language changes to update navigation links
+window.addEventListener('languageChanged', function(e) {
+  setTimeout(() => {
+    LanguageManager.updateNavigationLinks();
+  }, 100);
+});
+
+// Function to update all UI text elements
+function updateUIText() {
+  // Navigation
+  updateElementText('#catsBtn i.fa-bars + span', 'categories');
+  updateElementText('nav a[href="#home"]', 'home');
+  updateElementText('nav a[href="#services"]', 'services');
+  updateElementText('nav a[href="#how"]', 'how_it_works');
+  updateElementText('nav a[href="#testimonials"]', 'reviews');
+  updateElementText('nav a[href="contact.html"]', 'contact');
+  
+  // Hero section
+  updateElementHTML('.hero h1', 'hero_title');
+  updateElementText('.hero p', 'hero_subtitle');
+  updateElementText('.cta', 'hero_cta');
+  
+  // Services section
+  updateElementText('.section-title', 'services_title');
+  updateElementText('.duration-btn[data-duration="12"] .duration-text', 'x_months', {count: 12});
+  updateElementText('.duration-notice', 'duration_notice');
+  
+  // Update duration savings text
+  document.querySelectorAll('.duration-savings').forEach((el, index) => {
+    const durations = [1, 3, 6, 12];
+    const savings = [0, 10, 15, 20];
+    if (index < savings.length && savings[index] > 0) {
+      el.textContent = translate('save') + ` ${savings[index]}%`;
+    }
+  });
+  
+  // How it works section
+  updateElementText('#how .section-title', 'hiw_title');
+  updateElementText('.step:nth-child(1) h3', 'step1_title');
+  updateElementText('.step:nth-child(1) p', 'step1_desc');
+  updateElementText('.step:nth-child(2) h3', 'step2_title');
+  updateElementText('.step:nth-child(2) p', 'step2_desc');
+  updateElementText('.step:nth-child(3) h3', 'step3_title');
+  updateElementText('.step:nth-child(3) p', 'step3_desc');
+  
+  // Testimonials section
+  updateElementText('#testimonials .section-title', 'testimonials_title');
+  updateElementText('.quote p', 'testimonial_text');
+  updateElementText('.quote div', 'testimonial_author');
+  
+  // Badges section
+  updateElementText('.badges .section-title', 'badges_title');
+  updateElementText('.badge:nth-child(1)', 'badge1');
+  updateElementText('.badge:nth-child(2)', 'badge2');
+  updateElementText('.badge:nth-child(3)', 'badge3');
+  updateElementText('.badge:nth-child(4)', 'badge4');
+  updateElementText('.badge:nth-child(5)', 'badge5');
+  
+  // Footer
+  updateElementText('footer a[href="privacy.html"]', 'privacy');
+  updateElementText('footer a[href="terms.html"]', 'terms');
+  updateElementText('footer a[href="contact.html"]', 'support');
+  updateElementText('footer a[href="about.html"]', 'about');
+  updateElementText('footer a[href="faq.html"]', 'faq');
+  updateElementText('footer p', 'copyright');
+  
+  // Search
+  updateElementAttr('#searchInput', 'placeholder', 'search_placeholder');
+  updateElementText('#searchGo', 'search_button');
+  
+  // Auth modal
+  if (typeof state !== 'undefined') {
+    updateElementText('#authTitle', state.isSignup ? 'signup_title' : 'login_title');
+  }
+  updateElementAttr('#authEmail', 'placeholder', 'email_placeholder');
+  updateElementAttr('#authName', 'placeholder', 'name_placeholder');
+  updateElementAttr('#authPass', 'placeholder', 'password_placeholder');
+  
+  if (typeof state !== 'undefined') {
+    updateElementText('#authSubmit', state.isSignup ? 'signup_button' : 'login_button');
+    updateElementText('#authSwitchText', state.isSignup ? 'has_account' : 'no_account');
+    updateElementText('#switchAuth', state.isSignup ? 'login_link' : 'create_one');
+  }
+  
+  // Update buttons in product cards
+  document.querySelectorAll('.btn').forEach(btn => {
+    if (btn.textContent.includes('Add to Cart') || btn.textContent.includes('أضف إلى السلة')) {
+      btn.innerHTML = `<i class="fa-solid fa-cart-plus"></i> ${translate('add_to_cart')}`;
+      
+      // Update disabled state message
+      if (btn.disabled) {
+        btn.title = translate('please_login');
+      }
+    }
+  });
+  
+  // Update product descriptions and other dynamic content
+  updateProductCards();
+}
+
+// Helper function to update element text
+function updateElementText(selector, translationKey, params = {}) {
+  const element = document.querySelector(selector);
+  if (element) {
+    element.textContent = translate(translationKey, params);
+  }
+}
+
+// Helper function to update element HTML
+function updateElementHTML(selector, translationKey, params = {}) {
+  const element = document.querySelector(selector);
+  if (element) {
+    element.innerHTML = translate(translationKey, params);
+  }
+}
+
+// Helper function to update element attribute
+function updateElementAttr(selector, attr, translationKey, params = {}) {
+  const element = document.querySelector(selector);
+  if (element) {
+    element.setAttribute(attr, translate(translationKey, params));
+  }
+}
+
+// Update product cards with translated content
+function updateProductCards() {
+  // Update the "Add to Cart" buttons
+  document.querySelectorAll('.btn').forEach(btn => {
+    if (btn.textContent.includes('Add to Cart') || btn.textContent.includes('أضف إلى السلة')) {
+      btn.innerHTML = `<i class="fa-solid fa-cart-plus"></i> ${translate('add_to_cart')}`;
+      
+      // Update disabled state message
+      if (btn.disabled) {
+        btn.title = translate('please_login');
+      }
+    }
+  });
+}
+
+// Add these translations to the translations object
+translations.en['1_month'] = "1 Month";
+translations.en['x_months'] = "{count} Months";
+translations.ar['1_month'] = "1 شهر";
+translations.ar['x_months'] = "{count} أشهر";
+</script>
+</body>
+</html>

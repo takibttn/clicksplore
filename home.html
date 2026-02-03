@@ -1,0 +1,2387 @@
+<!DOCTYPE html>
+<html lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clicksplore - Premium Subscriptions at Fraction Cost</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/supabase/2.39.0/supabase.min.js"></script>
+    <style>
+    * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.6;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    overflow-x: hidden;
+}
+
+/* Ad Space */
+.ad-space {
+    background: rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.ad-space::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.ad-placeholder {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Navigation */
+nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    padding: 20px 0;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+nav.scrolled {
+    padding: 15px 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: 800;
+    color: white;
+    text-decoration: none;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: all 0.3s ease;
+}
+
+nav.scrolled .logo {
+    color: #333;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 30px;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+nav.scrolled .nav-links a {
+    color: #333;
+}
+
+.nav-links a:hover {
+    transform: translateY(-2px);
+}
+
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    transition: width 0.3s ease;
+}
+
+.nav-links a:hover::after {
+    width: 100%;
+}
+
+/* Hero Section */
+.hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 20px 80px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+}
+
+.floating-elements {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.floating-icon {
+    position: absolute;
+    opacity: 0.1;
+    animation: float 6s ease-in-out infinite;
+    color: white;
+}
+
+.floating-icon:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+.floating-icon:nth-child(2) { top: 60%; left: 85%; animation-delay: 1s; }
+.floating-icon:nth-child(3) { top: 30%; left: 80%; animation-delay: 2s; }
+.floating-icon:nth-child(4) { top: 70%; left: 15%; animation-delay: 3s; }
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(10deg); }
+}
+
+.hero-content {
+    max-width: 800px;
+    z-index: 2;
+    position: relative;
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 20px;
+    line-height: 1.1;
+    animation: slideInUp 1s ease-out;
+}
+
+.hero .highlight {
+    background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient 3s ease infinite, slideInUp 1s ease-out;
+}
+
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.hero p {
+    font-size: 1.3rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 40px;
+    animation: slideInUp 1s ease-out 0.2s both;
+}
+
+.cta-button {
+    display: inline-block;
+    background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+    color: white;
+    padding: 18px 40px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.4s ease;
+    animation: slideInUp 1s ease-out 0.4s both;
+    box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.cta-button:hover::before {
+    left: 100%;
+}
+
+.cta-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(255, 107, 107, 0.4);
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Services Section */
+.services {
+    padding: 100px 20px;
+    background: white;
+    position: relative;
+}
+
+.services::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    clip-path: polygon(0 50%, 100% 0%, 100% 100%, 0% 100%);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #333;
+    margin-bottom: 60px;
+}
+
+/* Filters Container */
+.filters-container {
+    margin-bottom: 50px;
+}
+
+.filters-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+/* Category filter */
+.category-filter {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 10px 20px;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-color: transparent;
+    transform: translateY(-2px);
+}
+
+/* Duration Filter */
+.duration-filter {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.duration-filter-label {
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+    font-size: 1.1rem;
+}
+
+.duration-btn {
+    padding: 12px 20px;
+    background: rgba(255, 107, 107, 0.1);
+    color: #ff6b6b;
+    border: 2px solid rgba(255, 107, 107, 0.2);
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    min-width: 80px;
+    text-align: center;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.duration-btn.active,
+.duration-btn:hover {
+    background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+    color: white;
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.duration-btn .duration-text {
+    font-size: 0.9rem;
+    line-height: 1.2;
+}
+
+.duration-btn .duration-savings {
+    font-size: 0.75rem;
+    margin-top: 2px;
+    opacity: 0.9;
+}
+
+.duration-btn.active .duration-savings {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.duration-notice {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(255, 107, 107, 0.05);
+    border-radius: 10px;
+    border-left: 4px solid #ff6b6b;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin-bottom: 80px;
+}
+
+.service-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px 30px;
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.service-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+}
+
+.service-card:hover::before {
+    transform: scaleX(1);
+}
+
+.service-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.service-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    transition: all 0.4s ease;
+}
+
+.service-card:hover .service-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.service-card h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.service-card .price {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #667eea;
+    margin-bottom: 10px;
+}
+
+.service-card .original-price {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 1rem;
+}
+
+/* How it Works */
+.how-it-works {
+    padding: 100px 20px;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+    margin-top: 60px;
+}
+
+.step {
+    text-align: center;
+    position: relative;
+}
+
+.step-number {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 auto 20px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.step h3 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+/* Testimonials */
+.testimonials {
+    padding: 100px 20px;
+    background: white;
+}
+
+.testimonial-slider {
+    max-width: 800px;
+    margin: 60px auto 0;
+    position: relative;
+}
+
+.testimonial {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+}
+
+.testimonial p {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
+.testimonial .author {
+    font-weight: 600;
+}
+
+/* Trust Badges */
+.trust-badges {
+    padding: 60px 20px;
+    background: #f8f9fa;
+}
+
+.badges-grid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+}
+
+.badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 25px;
+    background: white;
+    border-radius: 50px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    color: #333;
+    font-weight: 600;
+}
+
+.badge i {
+    color: #28a745;
+    font-size: 1.2rem;
+}
+
+/* Footer */
+footer {
+    background: #333;
+    color: white;
+    padding: 60px 20px 20px;
+    text-align: center;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.footer-links a {
+    color: white;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: #667eea;
+}
+
+/* Cart Icon */
+.cart-icon {
+    position: relative;
+    color: white;
+    font-size: 1.2rem;
+    padding: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+nav.scrolled .cart-icon {
+    color: #333;
+    background: rgba(102, 126, 234, 0.1);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+.cart-icon:hover {
+    transform: translateY(-2px) scale(1.1);
+    background: rgba(255, 107, 107, 0.8);
+    color: white;
+}
+
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff6b6b;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Categories Dropdown */
+.categories-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.categories-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+nav.scrolled .categories-btn {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #333;
+}
+
+.categories-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    min-width: 300px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+    border-radius: 15px;
+    z-index: 1000;
+    padding: 20px 0;
+    margin-top: 10px;
+    backdrop-filter: blur(20px);
+    animation: dropdownFadeIn 0.3s ease;
+}
+
+@keyframes dropdownFadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-content.show {
+    display: block;
+}
+
+.category-item {
+    display: block;
+    padding: 12px 25px;
+    color: #333;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.category-item:hover {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    border-left-color: #ff6b6b;
+    padding-left: 30px;
+}
+
+.category-icon {
+    width: 20px;
+    text-align: center;
+}
+
+/* Search Icon */
+.search-icon {
+    position: relative;
+    color: white;
+    font-size: 1.2rem;
+    padding: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+nav.scrolled .search-icon {
+    color: #333;
+    background: rgba(102, 126, 234, 0.1);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+.search-icon:hover {
+    transform: translateY(-2px) scale(1.1);
+    background: rgba(76, 217, 196, 0.8);
+    color: white;
+}
+
+/* Language Selector */
+.language-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.language-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    font-size: 0.9rem;
+}
+
+nav.scrolled .language-btn {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #333;
+}
+
+.language-btn:hover {
+    background: rgba(255, 155, 243, 0.8);
+    transform: translateY(-2px);
+    color: white;
+}
+
+.language-dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    min-width: 150px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+    border-radius: 15px;
+    z-index: 1000;
+    padding: 10px 0;
+    margin-top: 10px;
+    animation: dropdownFadeIn 0.3s ease;
+}
+
+.language-dropdown-content.show {
+    display: block;
+}
+
+.language-option {
+    display: block;
+    padding: 12px 20px;
+    color: #333;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.language-option:hover {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+}
+
+.language-option.active {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    font-weight: 600;
+}
+
+.flag-icon {
+    width: 20px;
+    height: 15px;
+    border-radius: 2px;
+    display: inline-block;
+}
+
+.flag-en {
+    background: linear-gradient(to bottom, #012169 33%, #fff 33%, #fff 66%, #C8102E 66%);
+}
+
+.flag-ar {
+    background: linear-gradient(to right, #CE1126 33%, #fff 33%, #fff 66%, #007A3D 66%);
+}
+
+/* Login Icon */
+.login-icon {
+    color: white;
+    font-size: 1.2rem;
+    padding: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+}
+
+nav.scrolled .login-icon {
+    color: #333;
+    background: rgba(102, 126, 234, 0.1);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+.login-icon:hover {
+    transform: translateY(-2px) scale(1.1);
+    background: rgba(255, 107, 107, 0.8);
+    color: white;
+}
+
+.login-tooltip {
+    position: absolute;
+    bottom: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.login-tooltip::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-bottom-color: #333;
+}
+
+.login-icon:hover .login-tooltip {
+    opacity: 1;
+}
+
+/* Chatbot Icon */
+.chatbot-icon {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    animation: float 3s ease-in-out infinite;
+}
+
+.chatbot-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+}
+
+.chatbot-icon::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    opacity: 0.3;
+    animation: ripple 2s infinite;
+}
+
+@keyframes ripple {
+    0% { transform: scale(1); opacity: 0.3; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+.chat-tooltip {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    background: #333;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.chat-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    right: 20px;
+    border: 5px solid transparent;
+    border-top-color: #333;
+}
+
+.chatbot-icon:hover .chat-tooltip {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Search Modal */
+.search-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.3s ease;
+}
+
+.search-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.search-input {
+    width: 100%;
+    padding: 15px 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+}
+
+.search-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.3s ease;
+}
+
+.search-close:hover {
+    color: #ff6b6b;
+}
+
+/* Login Modal */
+.login-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.3s ease;
+}
+
+.login-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.login-input {
+    padding: 15px 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.login-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 15px rgba(102, 126, 234, 0.2);
+}
+
+.login-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.3s ease;
+}
+
+.modal-close:hover {
+    color: #ff6b6b;
+}
+
+/* Loading spinner */
+#loading-spinner {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    color: #667eea;
+    z-index: 1000;
+}
+
+/* Error message */
+#error-message {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ff6b6b;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 5px;
+    z-index: 1000;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Toast message */
+.toast-message {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #28a745;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 50px;
+    z-index: 1000;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translate(-50%, 20px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Product card enhancements */
+.product-desc {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 10px 0;
+    min-height: 40px;
+    line-height: 1.4;
+}
+
+.price-container {
+    position: relative;
+    margin: 15px 0;
+}
+
+.discount-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: #ff6b6b;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.product-meta {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.product-meta i {
+    margin-right: 5px;
+}
+
+.add-to-cart-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.add-to-cart-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.add-to-cart-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.logo-img {
+    max-width: 40px;
+    max-height: 40px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+/* Loading state for products */
+.loading-card {
+    background: #f8f9fa;
+    border-radius: 20px;
+    padding: 40px 30px;
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.05);
+    animation: pulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+    from { opacity: 0.6; }
+    to { opacity: 1; }
+}
+
+/* Empty state */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px;
+    color: #666;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+/* Animation for duration selection */
+@keyframes duration-select {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.duration-btn.selected {
+    animation: duration-select 0.3s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+    
+    .hero p {
+        font-size: 1.1rem;
+    }
+    
+    .nav-links {
+        display: none;
+    }
+    
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .steps-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filters-row {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .category-filter {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .duration-filter {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .duration-filter-label {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+
+    .nav-container {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .floating-icon {
+        display: none;
+    }
+    
+    .badges-grid {
+        gap: 20px;
+    }
+    
+    .footer-links {
+        gap: 20px;
+        flex-direction: column;
+    }
+    
+    .chatbot-icon {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+    
+    .search-content,
+    .login-content {
+        width: 95%;
+        padding: 30px 20px;
+    }
+    
+    .dropdown-content {
+        min-width: 250px;
+        left: -100px;
+    }
+    
+    .language-dropdown-content {
+        right: -50px;
+    }
+    
+    .step-number {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    .service-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .duration-filter {
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 4px;
+        visibility: visible !important; /* Force visibility */
+    opacity: 1 !important; /* Force opacity */
+    }
+    
+    .duration-btn {
+        flex: 1;
+        max-width: none;
+        padding: 8px 4px;
+        font-size: 0.75rem;
+
+        display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 20px;
+    background: rgba(255, 107, 107, 0.1);
+    color: #ff6b6b;
+    border: 2px solid rgba(255, 107, 107, 0.2);
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    min-width: 80px;
+    text-align: center;
+    position: relative;
+    }
+}
+    </style>
+</head>
+<body>
+    <!-- Ad Space -->
+    <div class="ad-space">
+        <div class="ad-placeholder">🎯 Advertisement Space - Premium Placement Available</div>
+    </div>
+
+    <!-- Navigation -->
+    <nav id="navbar">
+       <div class="nav-container">
+            <a href="#home" class="logo">Clicksplore</a>
+            
+            <ul class="nav-links">
+                <li class="categories-dropdown">
+                    <button class="categories-btn" onclick="toggleDropdown()">
+                        <i class="fas fa-bars"></i> Categories <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-content" id="categoriesDropdown">
+                        <a href="#" class="category-item" data-category="streaming" onclick="filterByCategory('streaming')">
+                            <i class="fas fa-film category-icon"></i>
+                            <span>Streaming</span>
+                        </a>
+                        <a href="#" class="category-item" data-category="music" onclick="filterByCategory('music')">
+                            <i class="fas fa-music category-icon"></i>
+                            <span>Music</span>
+                        </a>
+                        <a href="#" class="category-item" data-category="software" onclick="filterByCategory('software')">
+                            <i class="fas fa-laptop-code category-icon"></i>
+                            <span>Software</span>
+                        </a>
+                        <a href="#" class="category-item" data-category="vpn" onclick="filterByCategory('vpn')">
+                            <i class="fas fa-shield-alt category-icon"></i>
+                            <span>VPN</span>
+                        </a>
+                        <a href="#" class="category-item" data-category="all" onclick="filterByCategory('all')">
+                            <i class="fas fa-th category-icon"></i>
+                            <span>All Services</span>
+                        </a>
+                    </div>
+                </li>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#how-it-works">How it Works</a></li>
+                <li><a href="#testimonials">Reviews</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+
+            <!-- Icons Container -->
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <!-- Search Icon -->
+                <div class="search-icon" onclick="openSearch()">
+                    <i class="fas fa-search"></i>
+                </div>
+
+                <!-- Language Selector -->
+                <div class="language-dropdown">
+                    <button class="language-btn" onclick="toggleLanguage()">
+                        <i class="fas fa-globe"></i>
+                        <span id="currentLang">EN</span>
+                        <i class="fas fa-chevron-down" style="font-size: 0.8rem;"></i>
+                    </button>
+                    <div class="language-dropdown-content" id="languageDropdown">
+                        <a href="#" class="language-option active" onclick="setLanguage('en')">
+                            <span class="flag-icon flag-en"></span>
+                            <span>English</span>
+                        </a>
+                        <a href="#" class="language-option" onclick="setLanguage('ar')">
+                            <span class="flag-icon flag-ar"></span>
+                            <span>العربية</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Cart Icon -->
+                <div class="cart-icon" onclick="openCart()">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-badge" id="cartCount">0</span>
+                </div>
+
+                <!-- Login Icon -->
+                <div class="login-icon" onclick="openLogin()">
+                    <i class="fas fa-user"></i>
+                    <div class="login-tooltip">Login</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="floating-elements">
+            <div class="floating-icon"><i class="fab fa-netflix" style="font-size: 3rem;"></i></div>
+            <div class="floating-icon"><i class="fab fa-spotify" style="font-size: 3rem;"></i></div>
+            <div class="floating-icon"><i class="fab fa-disney" style="font-size: 3rem;"></i></div>
+            <div class="floating-icon"><i class="fab fa-youtube" style="font-size: 3rem;"></i></div>
+        </div>
+        
+        <div class="hero-content">
+            <h1>Get <span class="highlight">Premium Subscriptions</span><br>at Fraction Cost</h1>
+            <p>Access Netflix, Spotify, Disney+, and more premium services through secure shared accounts. Save up to 75% while enjoying full premium features.</p>
+            <a href="#services" class="cta-button">
+                <i class="fas fa-rocket"></i> Get Netflix for $3.99/month!
+            </a>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services" id="services">
+        <div class="container">
+            <h2 class="section-title">Premium Services Available</h2>
+            
+            <!-- Filters Container -->
+            <div class="filters-container">
+                <!-- Category Filter -->
+                <div class="category-filter">
+                    <button class="filter-btn active" onclick="filterByCategory('all')">
+                        <i class="fas fa-th"></i> All Services
+                    </button>
+                    <button class="filter-btn" onclick="filterByCategory('streaming')">
+                        <i class="fas fa-film"></i> Streaming
+                    </button>
+                    <button class="filter-btn" onclick="filterByCategory('music')">
+                        <i class="fas fa-music"></i> Music
+                    </button>
+                    <button class="filter-btn" onclick="filterByCategory('software')">
+                        <i class="fas fa-laptop-code"></i> Software
+                    </button>
+                    <button class="filter-btn" onclick="filterByCategory('vpn')">
+                        <i class="fas fa-shield-alt"></i> VPN
+                    </button>
+                </div>
+
+                <!-- Duration Filter -->
+                <div class="duration-filter">
+                    <div class="duration-filter-label">
+                        <i class="fas fa-clock"></i> Select Duration:
+                    </div>
+                    <button class="duration-btn active" data-duration="1" onclick="selectGlobalDuration(1)">
+                        <span class="duration-text">1 Month</span>
+                    </button>
+                    <button class="duration-btn" data-duration="3" onclick="selectGlobalDuration(3)">
+                        <span class="duration-text">3 Months</span>
+                        <span class="duration-savings">Save 10%</span>
+                    </button>
+                    <button class="duration-btn" data-duration="6" onclick="selectGlobalDuration(6)">
+                        <span class="duration-text">6 Months</span>
+                        <span class="duration-savings">Save 15%</span>
+                    </button>
+                    <button class="duration-btn" data-duration="12" onclick="selectGlobalDuration(12)">
+                        <span class="duration-text">12 Months</span>
+                        <span class="duration-savings">Save 20%</span>
+                    </button>
+                </div>
+
+                <!-- Duration Notice -->
+                <div class="duration-notice">
+                    <i class="fas fa-info-circle"></i> 
+                    Please select a subscription duration above before adding items to your cart. Prices will adjust automatically based on your selection.
+                </div>
+            </div>
+
+            <div class="services-grid" id="servicesGrid">
+                <!-- Products will be dynamically loaded here -->
+                <div class="loading-card">
+                    <div class="service-icon">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <h3>Loading Products...</h3>
+                    <p>Please wait while we fetch the latest services</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it Works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title">How Clicksplore Works</h2>
+            <div class="steps-grid">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3><i class="fas fa-mouse-pointer"></i> Choose Duration & Service</h3>
+                    <p>First select your preferred subscription duration, then browse our catalog of premium services. Prices adjust automatically for longer durations.</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3><i class="fas fa-credit-card"></i> Secure Payment</h3>
+                    <p>Complete your purchase through our encrypted payment system. Your financial information is completely secure and protected.</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3><i class="fas fa-rocket"></i> Instant Access</h3>
+                    <p>Get immediate access to your premium subscriptions. Start enjoying your favorite content within minutes of purchase.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials" id="testimonials">
+        <div class="container">
+            <h2 class="section-title">What Our Users Say</h2>
+            <div class="testimonial-slider">
+                <div class="testimonial">
+                    <p>"Clicksplore saved me over $200 this year! I get all my favorite streaming services at a fraction of the cost. The setup was instant and everything works perfectly."</p>
+                    <div class="author">- Sarah M., Premium User</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Badges -->
+    <section class="trust-badges">
+        <div class="container">
+            <h2 class="section-title">Why Trust Clicksplore?</h2>
+            <div class="badges-grid">
+                <div class="badge">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>SSL Secured</span>
+                </div>
+                <div class="badge">
+                    <i class="fas fa-lock"></i>
+                    <span>Secure Payments</span>
+                </div>
+                <div class="badge">
+                    <i class="fas fa-undo"></i>
+                    <span>30-Day Refund</span>
+                </div>
+                <div class="badge">
+                    <i class="fas fa-headset"></i>
+                    <span>24/7 Support</span>
+                </div>
+                <div class="badge">
+                    <i class="fas fa-users"></i>
+                    <span>50k+ Users</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="terms.html">Terms of Service</a>
+                <a href="contact.html">Support</a>
+                <a href="about.html">About Us</a>
+                <a href="faq.html">FAQ</a>
+            </div>
+            <p>&copy; 2025 Clicksplore. All rights reserved. | Secure, Affordable, Trusted.</p>
+        </div>
+    </footer>
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="fas fa-spinner fa-spin"></div>
+
+    <!-- Error Message -->
+    <div id="error-message"></div>
+
+    <!-- Search Modal -->
+    <div id="searchModal" class="search-modal">
+        <div class="search-content">
+            <span class="search-close" onclick="closeSearch()">&times;</span>
+            <h2 style="margin-bottom: 20px; color: #333; text-align: center;">Search Products</h2>
+            <input type="text" class="search-input" placeholder="Search for services, software, subscriptions..." id="searchInput" onkeyup="handleSearchInput()">
+            <div style="margin-top: 20px; text-align: center;">
+                <button onclick="performSearch()" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer;">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="login-modal">
+        <div class="login-content">
+            <span class="modal-close" onclick="closeLogin()">&times;</span>
+            <h2 style="margin-bottom: 30px; color: #333; text-align: center;">Login to Clicksplore</h2>
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <input type="email" class="login-input" placeholder="Email Address" required>
+                <input type="password" class="login-input" placeholder="Password" required>
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="#" style="color: #667eea; text-decoration: none; font-size: 0.9rem;">Forgot Password?</a>
+                    <span style="margin: 0 10px; color: #ccc;">|</span>
+                    <a href="#" style="color: #667eea; text-decoration: none; font-size: 0.9rem;">Create Account</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Chatbot Icon -->
+    <div class="chatbot-icon" onclick="openChat()">
+        <i class="fas fa-comments"></i>
+        <div class="chat-tooltip">Chat with Admin</div>
+    </div>
+
+    <script>
+       // Initialize Supabase with credentials from config
+const supabaseUrl = 'https://hsomlteyiyjtusfqxfvh.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhzb21sdGV5aXlqdHVzZnF4ZnZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwMTUzMDgsImV4cCI6MjA3MDU5MTMwOH0.VEjhuylzTwja0crf7Cve9795J3L7QRvQ-8Zic04BtvY';
+
+// Initialize Supabase client correctly
+let supabase;
+try {
+    supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    console.log('✅ Supabase client initialized successfully');
+} catch (error) {
+    console.error('❌ Failed to initialize Supabase client:', error);
+}
+
+// Global variables
+let cartItems = [];
+let allProducts = [];
+let currentCategory = 'all';
+let currentUser = null;
+let selectedGlobalDuration = 1; // Default to 1 month
+
+// DOM Content Loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 DOM loaded, initializing app...');
+    initializeApp();
+});
+
+// Initialize the application
+async function initializeApp() {
+    try {
+        // Load cart from localStorage if available
+        const savedCart = localStorage.getItem('cartItems');
+        if (savedCart) {
+            try {
+                cartItems = JSON.parse(savedCart);
+                updateCartCount();
+            } catch (e) {
+                console.warn('Invalid cart data in localStorage, clearing...');
+                localStorage.removeItem('cartItems');
+            }
+        }
+
+        setupEventListeners();
+        await testSupabaseConnection();
+        await loadProducts();
+        await checkUserSession();
+        
+        console.log('✅ App initialized successfully');
+    } catch (error) {
+        console.error('❌ Error initializing app:', error);
+        showError('Application failed to initialize properly');
+    }
+}
+
+// Test Supabase connection
+async function testSupabaseConnection() {
+    try {
+        console.log('🔄 Testing Supabase connection...');
+        
+        if (!supabase) {
+            throw new Error('Supabase client not initialized');
+        }
+        
+        const { data, error } = await supabase
+            .from('subscription_services')
+            .select('id, name')
+            .limit(1);
+        
+        if (error) {
+            console.warn('⚠️ Supabase query error:', error.message);
+            console.log('Using fallback demo data');
+            return false;
+        } else {
+            console.log('✅ Supabase connected successfully');
+            if (data && data.length > 0) {
+                console.log('✅ Database has data:', data);
+            } else {
+                console.log('⚠️ Database is empty, will use demo data');
+            }
+            return true;
+        }
+    } catch (err) {
+        console.error('❌ Connection test failed:', err);
+        console.log('Using fallback demo data');
+        return false;
+    }
+}
+
+// Check if user is logged in
+async function checkUserSession() {
+    try {
+        if (!supabase) return;
+        
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (user && !error) {
+            currentUser = user;
+            updateUIForLoggedInUser();
+            console.log('✅ User session found:', user.email);
+        }
+    } catch (error) {
+        console.log('ℹ️ No active user session');
+    }
+}
+
+// Load products from Supabase or use fallback data
+async function loadProducts() {
+    try {
+        showLoading();
+        console.log('🔄 Loading products...');
+        
+        let products = [];
+        let fromDatabase = false;
+        
+        if (supabase) {
+            try {
+                const { data, error } = await supabase
+                    .from('subscription_services')
+                    .select(`
+                        id,
+                        name,
+                        description,
+                        category,
+                        original_price,
+                        our_price,
+                        is_shared,
+                        max_users_per_account,
+                        logo_url,
+                        features,
+                        is_active
+                    `)
+                    .eq('is_active', true)
+                    .order('name');
+                
+                if (!error && data && data.length > 0) {
+                    // Also fetch duration pricing
+                    const serviceIds = data.map(s => s.id);
+                    const { data: durationPrices, error: pricesError } = await supabase
+                        .from('subscription_duration_prices')
+                        .select('*')
+                        .in('service_id', serviceIds)
+                        .eq('is_active', true)
+                        .order('duration');
+                    
+                    if (!pricesError && durationPrices) {
+                        // Map duration prices to services
+                        products = data.map(service => {
+                            const servicePrices = durationPrices.filter(
+                                price => price.service_id === service.id
+                            );
+                            return {
+                                ...service,
+                                duration_pricing: servicePrices.length > 0 
+                                    ? servicePrices 
+                                    : generateDefaultDurationPrices(service.our_price)
+                            };
+                        });
+                        fromDatabase = true;
+                    } else {
+                        console.log('⚠️ Could not load duration prices, using default pricing');
+                        products = data.map(service => ({
+                            ...service,
+                            duration_pricing: generateDefaultDurationPrices(service.our_price)
+                        }));
+                        fromDatabase = true;
+                    }
+                }
+            } catch (dbError) {
+                console.error('Database error:', dbError);
+            }
+        }
+        
+        // If no products from database, use demo data
+        if (products.length === 0) {
+            console.log('ℹ️ Using demo data');
+            products = getDemoProducts();
+        }
+        
+        allProducts = products;
+        renderProducts(products);
+        hideLoading();
+        
+    } catch (error) {
+        console.error('❌ Error loading products:', error);
+        showError('Failed to load products. Please refresh the page.');
+        hideLoading();
+    }
+}
+
+// Generate default duration prices if none exist in database
+function generateDefaultDurationPrices(basePrice) {
+    return [
+        { duration: 1, price: basePrice, discount_percent: 0 },
+        { duration: 3, price: basePrice * 3 * 0.9, discount_percent: 10 },
+        { duration: 6, price: basePrice * 6 * 0.85, discount_percent: 15 },
+        { duration: 12, price: basePrice * 12 * 0.8, discount_percent: 20 }
+    ];
+}
+
+// Demo products for fallback
+function getDemoProducts() {
+    return [
+        {
+            id: 1,
+            name: "Netflix Premium",
+            description: "4K Ultra HD streaming on up to 4 devices simultaneously",
+            category: "streaming",
+            original_price: 22.99,
+            our_price: 3.99,
+            is_shared: true,
+            max_users_per_account: 4,
+            logo_url: "",
+            features: ["4K Streaming", "4 Devices", "No Ads", "All Regions"],
+            duration_pricing: generateDefaultDurationPrices(3.99)
+        },
+        {
+            id: 2,
+            name: "Spotify Premium",
+            description: "Ad-free music, download songs, and unlimited skips",
+            category: "music",
+            original_price: 9.99,
+            our_price: 2.49,
+            is_shared: true,
+            max_users_per_account: 3,
+            logo_url: "",
+            features: ["Ad-free", "Downloads", "Unlimited Skips", "High Quality"],
+            duration_pricing: generateDefaultDurationPrices(2.49)
+        },
+        {
+            id: 3,
+            name: "Disney+ Premium",
+            description: "All Disney, Marvel, Star Wars, and National Geographic content",
+            category: "streaming",
+            original_price: 13.99,
+            our_price: 4.99,
+            is_shared: true,
+            max_users_per_account: 4,
+            logo_url: "",
+            features: ["4K Streaming", "7 Profiles", "GroupWatch", "Downloads"],
+            duration_pricing: generateDefaultDurationPrices(4.99)
+        },
+        {
+            id: 4,
+            name: "YouTube Premium",
+            description: "Ad-free videos, background play, and YouTube Music included",
+            category: "streaming",
+            original_price: 11.99,
+            our_price: 3.99,
+            is_shared: true,
+            max_users_per_account: 5,
+            logo_url: "",
+            features: ["Ad-free", "Background Play", "Downloads", "YouTube Music"],
+            duration_pricing: generateDefaultDurationPrices(3.99)
+        },
+        {
+            id: 5,
+            name: "Adobe Creative Cloud",
+            description: "All Adobe apps including Photoshop, Premiere Pro, and more",
+            category: "software",
+            original_price: 52.99,
+            our_price: 12.99,
+            is_shared: true,
+            max_users_per_account: 2,
+            logo_url: "",
+            features: ["All Apps", "Cloud Storage", "Updates", "Fonts"],
+            duration_pricing: generateDefaultDurationPrices(12.99)
+        },
+        {
+            id: 6,
+            name: "NordVPN",
+            description: "Premium VPN service with high-speed servers worldwide",
+            category: "vpn",
+            original_price: 11.95,
+            our_price: 2.99,
+            is_shared: true,
+            max_users_per_account: 6,
+            logo_url: "",
+            features: ["6000+ Servers", "No Logs", "6 Devices", "Kill Switch"],
+            duration_pricing: generateDefaultDurationPrices(2.99)
+        }
+    ];
+}
+
+// Render products to the grid
+function renderProducts(products) {
+    const grid = document.getElementById('servicesGrid');
+    
+    if (!products || products.length === 0) {
+        grid.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <h3>No products found</h3>
+                <p>Try selecting a different category or search term</p>
+            </div>
+        `;
+        return;
+    }
+    
+    grid.innerHTML = products.map(product => {
+        const priceForDuration = getPriceForDuration(product, selectedGlobalDuration);
+        const discount = calculateDiscount(product.original_price, priceForDuration);
+        
+        return `
+            <div class="service-card" data-category="${product.category}" data-id="${product.id}">
+                ${product.logo_url ? 
+                    `<img src="${product.logo_url}" alt="${product.name}" class="logo-img">` : 
+                    `<div class="service-icon">
+                        <i class="${getCategoryIcon(product.category)}"></i>
+                    </div>`
+                }
+                <h3>${product.name}</h3>
+                <div class="product-desc">${product.description}</div>
+                
+                <div class="price-container">
+                    <div class="price">$${priceForDuration.toFixed(2)}/mo</div>
+                    <div class="original-price">$${product.original_price}/mo</div>
+                    ${discount > 0 ? `<div class="discount-badge">Save ${discount}%</div>` : ''}
+                </div>
+                
+                <div class="product-meta">
+                    <span><i class="fas fa-users"></i> ${product.max_users_per_account} users</span>
+                    <span><i class="fas fa-shield-alt"></i> ${product.is_shared ? 'Shared' : 'Private'}</span>
+                </div>
+                
+                <button class="add-to-cart-btn" onclick="addToCart(${product.id}, ${selectedGlobalDuration})">
+                    <i class="fas fa-cart-plus"></i> Add to Cart - $${(priceForDuration * selectedGlobalDuration).toFixed(2)}
+                </button>
+            </div>
+        `;
+    }).join('');
+}
+
+// Get price for selected duration
+function getPriceForDuration(product, duration) {
+    if (!product.duration_pricing) return product.our_price;
+    
+    const pricing = product.duration_pricing.find(p => p.duration === duration);
+    return pricing ? pricing.price / duration : product.our_price;
+}
+
+// Calculate discount percentage
+function calculateDiscount(originalPrice, ourPrice) {
+    return Math.round(((originalPrice - ourPrice) / originalPrice) * 100);
+}
+
+// Get category icon
+function getCategoryIcon(category) {
+    const icons = {
+        streaming: 'fas fa-film',
+        music: 'fas fa-music',
+        software: 'fas fa-laptop-code',
+        vpn: 'fas fa-shield-alt'
+    };
+    return icons[category] || 'fas fa-star';
+}
+
+// Setup event listeners
+function setupEventListeners() {
+    // Nav scroll effect
+    window.addEventListener('scroll', handleNavScroll);
+    
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', handleClickOutside);
+    
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+}
+
+// Handle navbar scroll effect
+function handleNavScroll() {
+    const navbar = document.getElementById('navbar');
+    if (window.scrollY > 100) {
+        navbar.classList.add('scrolled');
+    } else {
+        navbar.classList.remove('scrolled');
+    }
+}
+
+// Handle click outside dropdowns
+function handleClickOutside(e) {
+    // Close categories dropdown
+    const categoriesDropdown = document.getElementById('categoriesDropdown');
+    if (categoriesDropdown && categoriesDropdown.classList.contains('show') && 
+        !e.target.closest('.categories-dropdown')) {
+        categoriesDropdown.classList.remove('show');
+    }
+    
+    // Close language dropdown
+    const languageDropdown = document.getElementById('languageDropdown');
+    if (languageDropdown && languageDropdown.classList.contains('show') && 
+        !e.target.closest('.language-dropdown')) {
+        languageDropdown.classList.remove('show');
+    }
+}
+
+// Filter products by category
+function filterByCategory(category) {
+    currentCategory = category;
+    
+    // Update active button
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // Filter products
+    let filteredProducts;
+    if (category === 'all') {
+        filteredProducts = allProducts;
+    } else {
+        filteredProducts = allProducts.filter(product => product.category === category);
+    }
+    
+    renderProducts(filteredProducts);
+}
+
+// Select global duration for all products
+function selectGlobalDuration(duration) {
+    selectedGlobalDuration = duration;
+    
+    // Update active button
+    document.querySelectorAll('.duration-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.getAttribute('data-duration')) === duration) {
+            btn.classList.add('active');
+            btn.classList.add('selected');
+            setTimeout(() => btn.classList.remove('selected'), 300);
+        }
+    });
+    
+    // Re-render products with new pricing
+    let filteredProducts;
+    if (currentCategory === 'all') {
+        filteredProducts = allProducts;
+    } else {
+        filteredProducts = allProducts.filter(product => product.category === currentCategory);
+    }
+    
+    renderProducts(filteredProducts);
+}
+
+// Add item to cart
+function addToCart(productId, duration) {
+    const product = allProducts.find(p => p.id === productId);
+    if (!product) {
+        showError('Product not found');
+        return;
+    }
+    
+    const price = getPriceForDuration(product, duration);
+    const totalPrice = price * duration;
+    
+    // Check if item already in cart
+    const existingItemIndex = cartItems.findIndex(
+        item => item.id === productId && item.duration === duration
+    );
+    
+    if (existingItemIndex > -1) {
+        // Update quantity
+        cartItems[existingItemIndex].quantity += 1;
+    } else {
+        // Add new item
+        cartItems.push({
+            id: productId,
+            name: product.name,
+            price: price,
+            totalPrice: totalPrice,
+            duration: duration,
+            quantity: 1,
+            image: product.logo_url || getCategoryIcon(product.category)
+        });
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    
+    // Update UI
+    updateCartCount();
+    showToast(`${product.name} added to cart!`);
+}
+
+// Update cart count badge
+function updateCartCount() {
+    const cartCount = document.getElementById('cartCount');
+    const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    cartCount.textContent = totalItems;
+    
+    // Show/hide badge
+    if (totalItems > 0) {
+        cartCount.style.display = 'flex';
+    } else {
+        cartCount.style.display = 'none';
+    }
+}
+
+// Show toast message
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+// Show error message
+function showError(message) {
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    
+    setTimeout(() => {
+        errorDiv.style.display = 'none';
+    }, 5000);
+}
+
+// Show loading spinner
+function showLoading() {
+    document.getElementById('loading-spinner').style.display = 'block';
+}
+
+// Hide loading spinner
+function hideLoading() {
+    document.getElementById('loading-spinner').style.display = 'none';
+}
+
+// Toggle categories dropdown
+function toggleDropdown() {
+    const dropdown = document.getElementById('categoriesDropdown');
+    dropdown.classList.toggle('show');
+    
+    // Close language dropdown if open
+    const languageDropdown = document.getElementById('languageDropdown');
+    if (languageDropdown.classList.contains('show')) {
+        languageDropdown.classList.remove('show');
+    }
+}
+
+// Toggle language dropdown
+function toggleLanguage() {
+    const dropdown = document.getElementById('languageDropdown');
+    dropdown.classList.toggle('show');
+    
+    // Close categories dropdown if open
+    const categoriesDropdown = document.getElementById('categoriesDropdown');
+    if (categoriesDropdown.classList.contains('show')) {
+        categoriesDropdown.classList.remove('show');
+    }
+}
+
+// Set language
+function setLanguage(lang) {
+    document.getElementById('currentLang').textContent = lang.toUpperCase();
+    
+    // Update active option
+    document.querySelectorAll('.language-option').forEach(option => {
+        option.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // Close dropdown
+    document.getElementById('languageDropdown').classList.remove('show');
+    
+    // Here you would typically load translations
+    console.log(`Language set to: ${lang}`);
+}
+
+// Open search modal
+function openSearch() {
+    document.getElementById('searchModal').style.display = 'block';
+    document.getElementById('searchInput').focus();
+}
+
+// Close search modal
+function closeSearch() {
+    document.getElementById('searchModal').style.display = 'none';
+}
+
+// Handle search input
+function handleSearchInput() {
+    // Implement search as you type if needed
+}
+
+// Perform search
+function performSearch() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    
+    if (!searchTerm) {
+        renderProducts(allProducts);
+        closeSearch();
+        return;
+    }
+    
+    const filteredProducts = allProducts.filter(product => 
+        product.name.toLowerCase().includes(searchTerm) ||
+        product.description.toLowerCase().includes(searchTerm) ||
+        product.category.toLowerCase().includes(searchTerm)
+    );
+    
+    renderProducts(filteredProducts);
+    closeSearch();
+}
+
+// Open login modal
+function openLogin() {
+    document.getElementById('loginModal').style.display = 'block';
+}
+
+// Close login modal
+function closeLogin() {
+    document.getElementById('loginModal').style.display = 'none';
+}
+
+// Handle login form submission
+function handleLogin(event) {
+    event.preventDefault();
+    // Implement login logic here
+    showToast('Login functionality coming soon!');
+    closeLogin();
+}
+
+// Open cart
+function openCart() {
+    if (cartItems.length === 0) {
+        showToast('Your cart is empty');
+        return;
+    }
+    // Implement cart view
+    showToast('Cart view coming soon!');
+}
+
+// Open chat
+function openChat() {
+    showToast('Chat support coming soon!');
+}
+
+// Update UI for logged in user
+function updateUIForLoggedInUser() {
+    const loginIcon = document.querySelector('.login-icon');
+    if (loginIcon && currentUser) {
+        loginIcon.innerHTML = `<i class="fas fa-user-check"></i>`;
+        loginIcon.querySelector('.login-tooltip').textContent = 'Profile';
+    }
+}
+
+// Initialize nav scroll on load
+window.addEventListener('load', handleNavScroll);
+</script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FAQs | Clicksplore</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+  <style>
+    :root{
+      --hot:#ff00ff;--indigo:#08003d;--violet:#8c00ff;
+      --glass-1:rgba(11,8,32,.78);--glass-2:rgba(11,8,32,.64);
+      --white:#ffffff;--text:#eef0ff;--muted:rgba(255,255,255,.8);
+      --line:rgba(255,255,255,.16);--line-2:rgba(255,255,255,.22);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'Inter',system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      line-height:1.55;color:var(--text);
+      background: radial-gradient(1200px 800px at 10% 10%, rgba(255,0,255,.15), transparent 60%),
+                  radial-gradient(1000px 700px at 90% 20%, rgba(140,0,255,.15), transparent 60%),
+                  linear-gradient(135deg,var(--hot) 0%, var(--indigo) 100%);
+      background-attachment:fixed;overflow-x:hidden;
+    }
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;
+      background: conic-gradient(from 180deg at 70% -20%, rgba(255,255,255,.08), rgba(0,0,0,0) 40%),
+                  radial-gradient(800px 300px at 50% -5%, rgba(255,255,255,.08), transparent 60%);
+      mix-blend-mode: screen;opacity:.8}
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:18px 0;
+      transition:.25s ease;background:rgba(8,0,61,.18);backdrop-filter:blur(14px)}
+    nav.scrolled{background:rgba(8,0,61,.6);border-bottom:1px solid var(--line)}
+    .nav-container{max-width:1200px;margin:0 auto;display:flex;align-items:center;
+      justify-content:space-between;padding:0 20px;gap:16px}
+    .logo{font-size:1.6rem;font-weight:900;text-decoration:none;
+      background:linear-gradient(45deg,var(--hot),#9b5cff);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .nav-links{list-style:none;display:flex;gap:26px}
+    .nav-links a{color:var(--text);text-decoration:none;position:relative}
+    .nav-links a:after{content:"";position:absolute;left:0;bottom:-6px;height:2px;width:0;
+      background:linear-gradient(90deg,var(--hot),#9b5cff);transition:width .25s}
+    .nav-links a:hover:after{width:100%}
+
+    /* FAQ */
+    .faq-section{max-width:900px;margin:0 auto;padding:140px 20px 80px}
+    .faq-section h1{text-align:center;font-size:2.6rem;font-weight:900;color:#fff;margin-bottom:40px}
+    .faq-accordion h2{color:#ffd26f;font-size:1.4rem;margin:30px 0 16px}
+    .faq-item{background:var(--glass-1);border:1px solid var(--line);
+      border-radius:14px;margin-bottom:16px;overflow:hidden;box-shadow:0 12px 34px rgba(0,0,0,.25)}
+    .faq-question{padding:20px;display:flex;justify-content:space-between;align-items:center;
+      cursor:pointer;font-weight:700;color:#fff}
+    .faq-question:hover{background:rgba(255,255,255,.05)}
+    .faq-answer{padding:0 20px;max-height:0;overflow:hidden;color:var(--muted);
+      transition:max-height .3s ease,padding .3s ease}
+    .faq-item.active .faq-answer{padding:0 20px 20px;max-height:500px}
+    .faq-item.active .faq-question i{transform:rotate(180deg);transition:.3s}
+    
+    /* CTA */
+    .contact-cta{text-align:center;margin-top:50px;padding:30px;
+      background:linear-gradient(135deg,#7a5cff,#b05cff);
+      border-radius:16px;color:#fff;box-shadow:0 12px 40px rgba(122,92,255,.35)}
+    .contact-cta a{color:#fff;font-weight:700;text-decoration:underline}
+    
+    /* FOOTER */
+    footer{background:#0b0820;color:#dfe2ff;text-align:center;padding:50px 20px 20px}
+    footer .links{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;margin-bottom:16px}
+    footer .links a{color:#dfe2ff;text-decoration:none}
+    footer .links a:hover{color:#fff}
+
+    @media(max-width:768px){
+      .nav-links{display:none}
+      .faq-section{padding-top:110px}
+      .faq-question{font-size:1rem}
+    }
+  </style>
+</head>
+<body>
+  <!-- NAV -->
+  <nav id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">Clicksplore</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="faq.html">FAQs</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- FAQ SECTION -->
+  <section class="faq-section">
+    <h1>Frequently Asked Questions</h1>
+
+    <div class="faq-accordion">
+      <h2>Account Questions</h2>
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>How do shared accounts work?</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          <p>We purchase premium subscriptions and securely share access with multiple users. Each member gets their own profile where applicable (like Netflix) or secure login credentials for services that don't support multiple profiles.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>Is this legal?</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          <p>Yes, our service operates within the terms of service of most platforms. We're essentially acting as a family plan manager, which is permitted by most subscription services.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>What if my login stops working?</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          <p>We guarantee access for the duration of your subscription. If you experience any issues, contact our support team for an immediate replacement.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-accordion">
+      <h2>Payment & Billing</h2>
+      <div class="faq-item">
+        <div class="faq-question"><span>What payment methods do you accept?</span><i class="fas fa-chevron-down"></i></div>
+        <div class="faq-answer"><p>We accept Visa/MasterCard, PayPal, and major cryptocurrencies. All payments are processed securely.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question"><span>Do you offer refunds?</span><i class="fas fa-chevron-down"></i></div>
+        <div class="faq-answer"><p>Yes! We offer a 30-day money-back guarantee if you're not satisfied with our service.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question"><span>Can I cancel anytime?</span><i class="fas fa-chevron-down"></i></div>
+        <div class="faq-answer"><p>Absolutely. No long-term contracts. Cancel auto-renewal anytime in your dashboard.</p></div>
+      </div>
+    </div>
+
+    <div class="faq-accordion">
+      <h2>Technical Support</h2>
+      <div class="faq-item">
+        <div class="faq-question"><span>How quickly do I get access after payment?</span><i class="fas fa-chevron-down"></i></div>
+        <div class="faq-answer"><p>Access credentials are delivered instantly by email and also in your dashboard.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question"><span>What devices can I use?</span><i class="fas fa-chevron-down"></i></div>
+        <div class="faq-answer"><p>Our shared accounts work on smartphones, tablets, laptops, and smart TVs. Some services may limit simultaneous streams.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question"><span>Do you provide customer support?</span><i class="fas fa-chevron-down"></i></div>
+        <div class="faq-answer"><p>Yes! Our support team is available 24/7 via live chat and email. Average response time is under 15 minutes.</p></div>
+      </div>
+    </div>
+
+    <div class="contact-cta">
+      <h3>Still have questions?</h3>
+      <p>Our team is ready to help you anytime. <a href="contact.html">Contact us now</a>.</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="links">
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms</a>
+      <a href="refund.html">Refund Policy</a>
+      <a href="about.html">About Us</a>
+    </div>
+    <p>© 2025 Clicksplore. All rights reserved.</p>
+  </footer>
+
+<script>
+  // Accordion
+  document.querySelectorAll('.faq-question').forEach(q=>{
+    q.addEventListener('click',()=>{
+      const item=q.parentNode;
+      item.classList.toggle('active');
+      document.querySelectorAll('.faq-item').forEach(o=>{
+        if(o!==item) o.classList.remove('active');
+      });
+    });
+  });
+  // Navbar scroll effect
+  window.addEventListener('scroll',()=>{
+    const nav=document.getElementById('navbar');
+    if(window.scrollY>80) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
+  });
+</script>
+</body>
+</html>

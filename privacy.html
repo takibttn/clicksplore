@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Privacy Policy | Clicksplore</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+   <script>
+    // Global Language Management System
+    (function() {
+      'use strict';
+      
+      function initializeLanguage() {
+        let selectedLang = 'en';
+        
+        try {
+          const storedLang = localStorage.getItem('clicksplore_language');
+          if (storedLang && ['en', 'ar'].includes(storedLang)) {
+            selectedLang = storedLang;
+          } else {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlLang = urlParams.get('lang');
+            if (urlLang && ['en', 'ar'].includes(urlLang)) {
+              selectedLang = urlLang;
+              localStorage.setItem('clicksplore_language', urlLang);
+            }
+          }
+          
+          applyLanguage(selectedLang);
+        } catch (error) {
+          console.warn('Language initialization failed:', error);
+          applyLanguage('en');
+        }
+      }
+      
+      function applyLanguage(langCode) {
+        document.documentElement.lang = langCode;
+        document.documentElement.dir = langCode === 'ar' ? 'rtl' : 'ltr';
+        document.body.classList.remove('lang-en', 'lang-ar');
+        document.body.classList.add(`lang-${langCode}`);
+        localStorage.setItem('clicksplore_language', langCode);
+        
+        window.dispatchEvent(new CustomEvent('languageChanged', { 
+          detail: { language: langCode } 
+        }));
+      }
+      
+      window.ClicksploreLanguage = {
+        change: function(langCode) {
+          if (!['en', 'ar'].includes(langCode)) return;
+          applyLanguage(langCode);
+        },
+        get current() {
+          return localStorage.getItem('clicksplore_language') || 'en';
+        }
+      };
+      
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeLanguage);
+      } else {
+        initializeLanguage();
+      }
+    })();
+  </script>
+  <style>
+    :root{
+      --hot:#ff00ff;--indigo:#08003d;--violet:#8c00ff;
+      --glass-1:rgba(11,8,32,.78);--glass-2:rgba(11,8,32,.64);
+      --white:#ffffff;--text:#eef0ff;--muted:rgba(255,255,255,.82);
+      --line:rgba(255,255,255,.16);--line-2:rgba(255,255,255,.22);
+      --accent:#ffd26f;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      font-family:'Inter',system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      line-height:1.6;color:var(--text);
+      background: radial-gradient(1200px 800px at 10% 10%, rgba(255,0,255,.15), transparent 60%),
+                  radial-gradient(1000px 700px at 90% 20%, rgba(140,0,255,.15), transparent 60%),
+                  linear-gradient(135deg,var(--hot) 0%, var(--indigo) 100%);
+      background-attachment:fixed;overflow-x:hidden;
+    }
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;
+      background: conic-gradient(from 180deg at 70% -20%, rgba(255,255,255,.08), rgba(0,0,0,0) 40%),
+                  radial-gradient(800px 300px at 50% -5%, rgba(255,255,255,.08), transparent 60%);
+      mix-blend-mode: screen;opacity:.8}
+
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:18px 0;
+      transition:.25s ease;background:rgba(8,0,61,.18);backdrop-filter:blur(14px)}
+    nav.scrolled{background:rgba(8,0,61,.6);border-bottom:1px solid var(--line)}
+    .nav-container{max-width:1200px;margin:0 auto;display:flex;align-items:center;
+      justify-content:space-between;padding:0 20px;gap:16px}
+    .logo{font-size:1.6rem;font-weight:900;letter-spacing:.3px;text-decoration:none;
+      background:linear-gradient(45deg,var(--hot),#9b5cff);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .nav-links{list-style:none;display:flex;gap:26px}
+    .nav-links a{color:var(--text);text-decoration:none;position:relative}
+    .nav-links a:after{content:"";position:absolute;left:0;bottom:-6px;height:2px;width:0;
+      background:linear-gradient(90deg,var(--hot),#9b5cff);transition:width .25s}
+    .nav-links a:hover:after{width:100%}
+    
+    /* Language Switcher */
+    .lang-switcher {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .lang-switcher:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--line-2);
+    }
+    .lang-flag {
+      width: 20px;
+      height: 15px;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .lang-flag img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .lang-name {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    /* DROPDOWN MENU STYLES - ADDED TO FIX THE ISSUE */
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      min-width: 180px;
+      background: var(--glass-1);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 24px 60px rgba(0,0,0,.35);
+      display: none;
+      padding: 12px;
+      animation: fadeIn 0.2s ease;
+      z-index: 1002;
+      margin-top: 10px;
+      backdrop-filter: blur(14px);
+    }
+    
+    .dropdown-menu.show {
+      display: block;
+    }
+    
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: var(--text);
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .dropdown-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-left-color: var(--hot);
+    }
+    
+    .lang-menu {
+      right: 0;
+      left: auto;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* PAGE WRAPPER */
+    .wrap{max-width:1000px;margin:0 auto;padding:140px 20px 90px}
+
+    /* HEADER */
+    .privacy-header{text-align:center;margin-bottom:26px}
+    .privacy-title{font-size:2.6rem;font-weight:900;color:#fff;margin-bottom:10px}
+    .privacy-date{color:var(--muted);font-size:1.05rem}
+
+    /* CARD */
+    .card{
+      background:var(--glass-1);
+      border:1px solid var(--line);
+      border-radius:16px;
+      box-shadow:0 20px 60px rgba(0,0,0,.28);
+      padding:28px;
+    }
+
+    /* SECTIONS */
+    .privacy-section{margin-bottom:26px}
+    .privacy-section h2{
+      font-size:1.35rem;color:var(--accent);margin-bottom:10px;
+      padding-bottom:10px;border-bottom:1px dashed var(--line)
+    }
+    .privacy-section h3{
+      font-size:1.05rem;color:#fff;margin:18px 0 8px
+    }
+    .privacy-section p,.privacy-section ul{color:var(--muted)}
+    .privacy-section ul{padding-left:18px}
+    .privacy-section li{margin-bottom:8px}
+
+    .highlight-box{
+      background:rgba(255,255,255,.06);
+      border-left:4px solid var(--accent);
+      padding:16px;border-radius:10px;margin:14px 0;color:#fff
+    }
+
+    .last-updated{margin-top:10px;text-align:center;color:var(--muted);font-style:italic}
+
+    /* FOOTER */
+    footer{background:#0b0820;color:#dfe2ff;text-align:center;padding:54px 20px 24px}
+    footer .links{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
+    footer .links a{color:#dfe2ff;text-decoration:none}
+    footer .links a:hover{color:#fff}
+
+    /* Enhanced RTL Support */
+    [dir="rtl"] {
+      direction: rtl;
+      text-align: right;
+    }
+    [dir="rtl"] .nav-container {
+      flex-direction: row-reverse;
+    }
+    [dir="rtl"] .nav-links {
+      flex-direction: row-reverse;
+      padding-right: 0;
+    }
+    [dir="rtl"] .lang-switcher {
+      flex-direction: row-reverse;
+    }
+    [dir="rtl"] .privacy-section ul {
+      padding-left: 0;
+      padding-right: 18px;
+    }
+    [dir="rtl"] .highlight-box {
+      border-left: none;
+      border-right: 4px solid var(--accent);
+    }
+    [dir="rtl"] footer .links {
+      flex-direction: row-reverse;
+    }
+    [dir="rtl"] .nav-links a:after {
+      left: auto;
+      right: 0;
+    }
+    
+    [dir="rtl"] .dropdown-menu {
+      right: auto;
+      left: 0;
+    }
+    
+    [dir="rtl"] .dropdown-item {
+      border-left: none;
+      border-right: 3px solid transparent;
+    }
+    
+    [dir="rtl"] .dropdown-item:hover {
+      border-left-color: transparent;
+      border-right-color: var(--hot);
+    }
+
+    /* Arabic font support */
+    [lang="ar"] {
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    }
+    [lang="ar"] .privacy-title {
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    @media(max-width:768px){
+      .nav-links{display:none}
+      .wrap{padding-top:110px}
+      .card{padding:20px}
+      .privacy-title{font-size:2.1rem}
+      [dir="rtl"] .nav-container {
+        padding: 0 20px;
+      }
+      
+      .dropdown-menu {
+        right: 20px;
+        left: 20px;
+        min-width: unset;
+      }
+      
+      [dir="rtl"] .dropdown-menu {
+        right: 20px;
+        left: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- NAV -->
+  <nav id="navbar">
+    <div class="nav-container">
+      <a href="test3.html" class="logo">Clicksplore</a>
+      <ul class="nav-links">
+        <li><a href="test3.html" data-i18n="nav.home">Home</a></li>
+        <li><a href="index.html#services" data-i18n="nav.services">Services</a></li>
+        <li><a href="faq.html" data-i18n="nav.faq">FAQs</a></li>
+        <li><a href="contact.html" data-i18n="nav.contact">Contact</a></li>
+      </ul>
+      <div class="lang-switcher" id="langSwitcher">
+        <div class="lang-flag">
+          <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MCAzMCI+PHBhdGggZmlsbD0iIzAyNDcwMSIgZD0iTTAgMGg2MHYzMEgweiIvPjxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik0wIDBoNjB2Nkgwem0wIDEyaDB2Nmg2MHYtNnptMCAxMmgtMHY2aDYwdi02eiIvPjxwYXRoIGZpbGw9IiNjZTExMjIiIGQ9Ik0wIDZoNjB2Nkgwem0wIDEyaDYwdjZIMHoiLz48cGF0aCBmaWxsPSIjMDI0NzAxIiBkPSJNMzAgMTV2LTFINjB2MTBIMzB2LTFoLTEwdjEwaC0xMHYtMTBoLTEwdjFIMHYtMTBoNjB2MTB6Ii8+PC9zdmc+" id="currentFlag">
+        </div>
+        <span class="lang-name" id="currentLang">English</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Language Dropdown -->
+  <div class="dropdown-menu lang-menu" id="langMenu" style="display: none;">
+    <div class="dropdown-item" onclick="setLanguage('en')">
+      <div class="lang-flag">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MCAzMCI+PHBhdGggZmlsbD0iIzAyNDcwMSIgZD0iTTAgMGg2MHYzMEgweiIvPjxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik0wIDBoNjB2Nkgwem0wIDEyaDB2Nmg2MHYtNnptMCAxMmgtMHY2aDYwdi02eiIvPjxwYXRoIGZpbGw9IiNjZTExMjIiIGQ9Ik0wIDZoNjB2Nkgwem0wIDEyaDYwdjZIMHoiLz48cGF0aCBmaWxsPSIjMDI0NzAxIiBkPSJNMzAgMTV2LTFINjB2MTBIMzB2LTFoLTEwdjEwaC0xMHYtMTBoLTEwdjFIMHYtMTBoNjB2MTB6Ii8+PC9zdmc+" alt="English">
+      </div>
+      <span>English</span>
+    </div>
+    <div class="dropdown-item" onclick="setLanguage('ar')">
+      <div class="lang-flag">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MCAzMCI+PHBhdGggZmlsbD0iI2NjMTEyMiIgZD0iTTAgMGg2MHYzMEgweiIvPjxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik0wIDBoNjB2MTBIMHptMCAyMGg2MHYxMEgweiIvPjxwYXRoIGZpbGw9IiMwMDAiIGQ9Ik0wIDEwaDYwdjEwSDB6Ii8+PC9zdmc+" alt="Arabic">
+      </div>
+      <span>العربية (Arabic)</span>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <main class="wrap">
+    <header class="privacy-header">
+      <h1 class="privacy-title" data-i18n="privacy.title">Privacy Policy</h1>
+      <div class="privacy-date" data-i18n="privacy.lastUpdated">Last Updated: January 1, 2025</div>
+    </header>
+
+    <article class="card">
+      <section class="privacy-section">
+        <h2 data-i18n="privacy.section1.title">1. Introduction</h2>
+        <p data-i18n="privacy.section1.p1">Clicksplore ("we", "us", or "our") operates the clicksplore.com website (the "Service"). This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our Service.</p>
+        <div class="highlight-box" data-i18n="privacy.section1.highlight">
+          By using the Service, you agree to the collection and use of information in accordance with this policy. We will not use or share your information with anyone except as described in this Privacy Policy.
+        </div>
+      </section>
+
+      <section class="privacy-section">
+        <h2 data-i18n="privacy.section2.title">2. Information We Collect</h2>
+
+        <h3 data-i18n="privacy.section2.sub1">2.1 Personal Data</h3>
+        <p data-i18n="privacy.section2.p1">While using our Service, we may ask you to provide us with certain personally identifiable information that can be used to contact or identify you ("Personal Data"). This may include:</p>
+        <ul>
+          <li data-i18n="privacy.section2.li1">Email address</li>
+          <li data-i18n="privacy.section2.li2">First name and last name</li>
+          <li data-i18n="privacy.section2.li3">Phone number</li>
+          <li data-i18n="privacy.section2.li4">Payment information (processed securely by our payment processors)</li>
+          <li data-i18n="privacy.section2.li5">Usage data and cookies</li>
+        </ul>
+
+        <h3 data-i18n="privacy.section2.sub2">2.2 Usage Data</h3>
+        <p data-i18n="privacy.section2.p2">We may collect information how the Service is accessed and used ("Usage Data"). This may include:</p>
+        <ul>
+          <li data-i18n="privacy.section2.li6">IP address</li>
+          <li data-i18n="privacy.section2.li7">Browser type and version</li>
+          <li data-i18n="privacy.section2.li8">Pages visited and time spent</li>
+          <li data-i18n="privacy.section2.li9">Device identifiers</li>
+        </ul>
+      </section>
+
+      <section class="privacy-section">
+        <h2 data-i18n="privacy.section3.title">3. How We Use Your Data</h2>
+        <p data-i18n="privacy.section3.p1">Clicksplore uses the collected data for various purposes:</p>
+        <ul>
+          <li data-i18n="privacy.section3.li1">To provide and maintain our Service</li>
+          <li data-i18n="privacy.section3.li2">To notify you about changes to our Service</li>
+          <li data-i18n="privacy.section3.li3">To allow you to participate in interactive features</li>
+          <li data-i18n="privacy.section3.li4">To provide customer support</li>
+          <li data-i18n="privacy.section3.li5">To monitor usage of the Service</li>
+          <li data-i18n="privacy.section3.li6">To detect and prevent technical issues</li>
+        </ul>
+      </section>
+
+      <section class="privacy-section">
+        <h2 data-i18n="privacy.section4.title">4. Data Sharing & Disclosure</h2>
+
+        <h3 data-i18n="privacy.section4.sub1">4.1 Service Providers</h3>
+        <p data-i18n="privacy.section4.p1">We may employ third-party companies to facilitate our Service ("Service Providers"), such as payment processors and analytics providers. These third parties have access to your Personal Data only to perform these tasks and are obligated not to disclose or use it for any other purpose.</p>
+
+        <h3 data-i18n="privacy.section4.sub2">4.2 Legal Requirements</h3>
+        <p data-i18n="privacy.section4.p2">We may disclose your Personal Data if required to do so by law or in response to valid requests by public authorities.</p>
+      </section>
+
+      <section class="privacy-section">
+        <h2 data-i18n="privacy.section5.title">5. Data Security</h2>
+        <p data-i18n="privacy.section5.p1">We implement appropriate technical and organizational measures to protect your Personal Data. However, no method of transmission over the Internet or electronic storage is 100% secure, and we cannot guarantee absolute security.</p>
+      </section>
+
+      <section class="privacy-section">
+        <h2 data-i18n="privacy.section6.title">6. Your Data Rights</h2>
+        <p data-i18n="privacy.section6.p1">Depending on your location, you may have certain rights regarding your Personal Data:</p>
+        <ul>
+          <li><strong data-i18n="privacy.section6.li1">Access:</strong> <span data-i18n="privacy.section6.li1t">Request copies of your personal data</span></li>
+          <li><strong data-i18n="privacy.section6.li2">Rectification:</strong> <span data-i18n="privacy.section6.li2t">Request correction of inaccurate data</span></li>
+          <li><strong data-i18n="privacy.section6.li3">Erasure:</strong> <span data-i18n="privacy.section6.li3t">Request deletion of your personal data</span></li>
+          <li><strong data-i18n="privacy.section6.li4">Restriction:</strong> <span data-i18n="privacy.section6.li4t">Request restriction of processing</span></li>
+          <li><strong data-i18n="privacy.section6.li5">Portability:</strong> <span data-i18n="privacy.section6.li5t">Request transfer of your data</span></li>
+          <li><strong data-i18n="privacy.section6.li6">Objection:</strong> <span data-i18n="privacy.section6.li6t">Object to our processing of your data</span></li>
+        </ul>
+        <p data-i18n="privacy.section6.p2">To exercise these rights, please contact us at <strong>privacy@clicksplore.com</strong>.</p>
+      </section>
+
+      <section class="privacy-section">
+        <h2 data-i18n="privacy.section7.title">7. Cookies & Tracking</h2>
+        <p data-i18n="privacy.section7.p1">We use cookies and similar tracking technologies to track activity on our Service. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent.</p>
+      </section>
+
+      <section class="privacy-section">
+        <h2 data-i18n="privacy.section8.title">8. Children's Privacy</h2>
+        <p data-i18n="privacy.section8.p1">Our Service does not address anyone under the age of 18 ("Children"). We do not knowingly collect personally identifiable information from children.</p>
+      </section>
+
+      <section class="privacy-section">
+        <h2 data-i18n="privacy.section9.title">9. Changes to This Policy</h2>
+        <p data-i18n="privacy.section9.p1">We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "last updated" date.</p>
+      </section>
+
+      <div class="last-updated" data-i18n="privacy.footer">
+        This Privacy Policy was last updated on January 1, 2025.
+      </div>
+    </article>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="links">
+      <a href="privacy.html" data-i18n="footer.privacy">Privacy Policy</a>
+      <a href="terms.html" data-i18n="footer.terms">Terms of Service</a>
+      <a href="refund.html" data-i18n="footer.refund">Refund Policy</a>
+      <a href="contact.html" data-i18n="footer.contact">Contact Us</a>
+    </div>
+    <p data-i18n="footer.copyright">© 2025 Clicksplore. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Language management system
+    const translations = {
+      en: {
+        // Navigation
+        "nav.home": "Home",
+        "nav.services": "Services",
+        "nav.faq": "FAQs",
+        "nav.contact": "Contact",
+        
+        // Privacy Policy
+        "privacy.title": "Privacy Policy",
+        "privacy.lastUpdated": "Last Updated: January 1, 2025",
+        "privacy.section1.title": "1. Introduction",
+        "privacy.section1.p1": 'Clicksplore ("we", "us", or "our") operates the clicksplore.com website (the "Service"). This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our Service.',
+        "privacy.section1.highlight": 'By using the Service, you agree to the collection and use of information in accordance with this policy. We will not use or share your information with anyone except as described in this Privacy Policy.',
+        
+        "privacy.section2.title": "2. Information We Collect",
+        "privacy.section2.sub1": "2.1 Personal Data",
+        "privacy.section2.p1": 'While using our Service, we may ask you to provide us with certain personally identifiable information that can be used to contact or identify you ("Personal Data"). This may include:',
+        "privacy.section2.li1": "Email address",
+        "privacy.section2.li2": "First name and last name",
+        "privacy.section2.li3": "Phone number",
+        "privacy.section2.li4": "Payment information (processed securely by our payment processors)",
+        "privacy.section2.li5": "Usage data and cookies",
+        "privacy.section2.sub2": "2.2 Usage Data",
+        "privacy.section2.p2": 'We may collect information how the Service is accessed and used ("Usage Data"). This may include:',
+        "privacy.section2.li6": "IP address",
+        "privacy.section2.li7": "Browser type and version",
+        "privacy.section2.li8": "Pages visited and time spent",
+        "privacy.section2.li9": "Device identifiers",
+        
+        "privacy.section3.title": "3. How We Use Your Data",
+        "privacy.section3.p1": "Clicksplore uses the collected data for various purposes:",
+        "privacy.section3.li1": "To provide and maintain our Service",
+        "privacy.section3.li2": "To notify you about changes to our Service",
+        "privacy.section3.li3": "To allow you to participate in interactive features",
+        "privacy.section3.li4": "To provide customer support",
+        "privacy.section3.li5": "To monitor usage of the Service",
+        "privacy.section3.li6": "To detect and prevent technical issues",
+        
+        "privacy.section4.title": "4. Data Sharing & Disclosure",
+        "privacy.section4.sub1": "4.1 Service Providers",
+        "privacy.section4.p1": 'We may employ third-party companies to facilitate our Service ("Service Providers"), such as payment processors and analytics providers. These third parties have access to your Personal Data only to perform these tasks and are obligated not to disclose or use it for any other purpose.',
+        "privacy.section4.sub2": "4.2 Legal Requirements",
+        "privacy.section4.p2": "We may disclose your Personal Data if required to do so by law or in response to valid requests by public authorities.",
+        
+        "privacy.section5.title": "5. Data Security",
+        "privacy.section5.p1": "We implement appropriate technical and organizational measures to protect your Personal Data. However, no method of transmission over the Internet or electronic storage is 100% secure, and we cannot guarantee absolute security.",
+        
+        "privacy.section6.title": "6. Your Data Rights",
+        "privacy.section6.p1": "Depending on your location, you may have certain rights regarding your Personal Data:",
+        "privacy.section6.li1": "Access:",
+        "privacy.section6.li1t": "Request copies of your personal data",
+        "privacy.section6.li2": "Rectification:",
+        "privacy.section6.li2t": "Request correction of inaccurate data",
+        "privacy.section6.li3": "Erasure:",
+        "privacy.section6.li3t": "Request deletion of your personal data",
+        "privacy.section6.li4": "Restriction:",
+        "privacy.section6.li4t": "Request restriction of processing",
+        "privacy.section6.li5": "Portability:",
+        "privacy.section6.li5t": "Request transfer of your data",
+        "privacy.section6.li6": "Objection:",
+        "privacy.section6.li6t": "Object to our processing of your data",
+        "privacy.section6.p2": "To exercise these rights, please contact us at <strong>privacy@clicksplore.com</strong>.",
+        
+        "privacy.section7.title": "7. Cookies & Tracking",
+        "privacy.section7.p1": "We use cookies and similar tracking technologies to track activity on our Service. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent.",
+        
+        "privacy.section8.title": "8. Children's Privacy",
+        "privacy.section8.p1": 'Our Service does not address anyone under the age of 18 ("Children"). We do not knowingly collect personally identifiable information from children.',
+        
+        "privacy.section9.title": "9. Changes to This Policy",
+        "privacy.section9.p1": "We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the 'last updated' date.",
+        
+        "privacy.footer": "This Privacy Policy was last updated on January 1, 2025.",
+        
+        // Footer
+        "footer.privacy": "Privacy Policy",
+        "footer.terms": "Terms of Service",
+        "footer.refund": "Refund Policy",
+        "footer.contact": "Contact Us",
+        "footer.copyright": "© 2025 Clicksplore. All rights reserved."
+      },
+      ar: {
+        // Navigation
+        "nav.home": "الرئيسية",
+        "nav.services": "الخدمات",
+        "nav.faq": "الأسئلة الشائعة",
+        "nav.contact": "اتصل بنا",
+        
+        // Privacy Policy
+        "privacy.title": "سياسة الخصوصية",
+        "privacy.lastUpdated": "آخر تحديث: 1 يناير 2025",
+        "privacy.section1.title": "1. المقدمة",
+        "privacy.section1.p1": 'تoperates Clicksplore ("نحن" أو "خاصتنا") موقع clicksplore.com (الخدمة"). تخبرك هذه الصفحة بسياساتنا regarding جمع واستخدام وكشف البيانات الشخصية عند استخدامك للخدمة.',
+        "privacy.section1.highlight": "باستخدامك للخدمة، فإنك توافق على جمع واستخدام المعلومات وفقًا لهذه السياسة. نحن لن نستخدم أو نشارك معلوماتك مع أي أحد إلا كما هو موضح في سياسة الخصوصية هذه.",
+        
+        "privacy.section2.title": "2. المعلومات التي نجمعها",
+        "privacy.section2.sub1": "2.1 البيانات الشخصية",
+        "privacy.section2.p1": 'أثناء استخدامك للخدمة، قد نطلب منك تزويدنا بمعلومات تعريف شخصية معينة يمكن استخدامها للاتصال بك أو التعرف عليك ("البيانات الشخصية"). قد يشمل هذا:',
+        "privacy.section2.li1": "عنوان البريد الإلكتروني",
+        "privacy.section2.li2": "الاسم الأول والاسم الأخير",
+        "privacy.section2.li3": "رقم الهاتف",
+        "privacy.section2.li4": "معلومات الدفع (يتم معالجتها بأمان بواسطة معالجات الدفع الخاصة بنا)",
+        "privacy.section2.li5": "بيانات الاستخدام والكوكيز",
+        "privacy.section2.sub2": "2.2 بيانات الاستخدام",
+        "privacy.section2.p2": 'قد نجمع information حول كيفية الوصول إلى الخدمة واستخدامها ("بيانات الاستخدام"). قد يشمل هذا:',
+        "privacy.section2.li6": "عنوان IP",
+        "privacy.section2.li7": "نوع المتصفح وإصداره",
+        "privacy.section2.li8": "الصفحات التي تمت زيارتها والوقت المقضي",
+        "privacy.section2.li9": "معرفات الجهاز",
+        
+        "privacy.section3.title": "3. كيف نستخدم بياناتك",
+        "privacy.section3.p1": "يستخدم Clicksplore البيانات المجمعة لأغراض متنوعة:",
+        "privacy.section3.li1": "لتوفير والحفاظ على خدمتنا",
+        "privacy.section3.li2": "لإخطارك بالتغييرات على خدمتنا",
+        "privacy.section3.li3": "لتمكينك من المشاركة في الميزات التفاعلية",
+        "privacy.section3.li4": "لتقديم دعم العملاء",
+        "privacy.section3.li5": "لمراقبة استخدام الخدمة",
+        "privacy.section3.li6": "لكشف ومنع المشاكل التقنية",
+        
+        "privacy.section4.title": "4. مشاركة وكشف البيانات",
+        "privacy.section4.sub1": "4.1 مقدمي الخدمة",
+        "privacy.section4.p1": 'قد نوظف شركات خارجية لتسهيل خدمتنا ("مقدمو الخدمة")، مثل معالجات الدفع ومقدمي التحليلات. لدى هؤلاء الأطراف الثالثة access إلى بياناتك الشخصية فقط لأداء these المهام وملزمون بعدم الكشف عنها أو استخدامها لأي غرض آخر.',
+        "privacy.section4.sub2": "4.2 المتطلبات القانونية",
+        "privacy.section4.p2": "قد نكشف عن بياناتك الشخصية إذا طُلب منا القيام بذلك بموجب القانون أو استجابة لطلبات صالحة من السلطات العامة.",
+        
+        "privacy.section5.title": "5. أمان البيانات",
+        "privacy.section5.p1": "ننفذ تدابير فنية وتنظيمية مناسبة لحماية بياناتك الشخصية. ومع ذلك، لا توجد طريقة نقل عبر الإنترنت أو التخزين الإلكتروني آمنة بنسبة 100٪، ولا يمكننا ضمان الأمان المطلق.",
+        
+        "privacy.section6.title": "6. حقوق بياناتك",
+        "privacy.section6.p1": "اعتمادًا على موقعك، قد يكون لديك certain حقوق regarding بياناتك الشخصية:",
+        "privacy.section6.li1": "الوصول:",
+        "privacy.section6.li1t": "طلب نسخ من بياناتك الشخصية",
+        "privacy.section6.li2": "التصحيح:",
+        "privacy.section6.li2t": "طلب تصحيح البيانات غير الدقيقة",
+        "privacy.section6.li3": "المحو:",
+        "privacy.section6.li3t": "طلب حذف بياناتك الشخصية",
+        "privacy.section6.li4": "القيود:",
+        "privacy.section6.li4t": "طلب تقييد المعالجة",
+        "privacy.section6.li5": "إمكانية النقل:",
+        "privacy.section6.li5t": "طلب نقل بياناتك",
+        "privacy.section6.li6": "الاعتراض:",
+        "privacy.section6.li6t": "الاعتراض على معالجتنا لبياناتك",
+        "privacy.section6.p2": "لممارسة هذه الحقوق، يرجى الاتصال بنا على <strong>privacy@clicksplore.com</strong>.",
+        
+        "privacy.section7.title": "7. الكوكيز والتتبع",
+        "privacy.section7.p1": "نستخدم تقنيات الكوكيز والتتبع المماثلة لتتبع النشاط على خدمتنا. يمكنك توجيه متصفحك لرفض جميع الكوكيز أو للإشارة عندما يتم إرسال كوكي.",
+        
+        "privacy.section8.title": "8. خصوصية الأطفال",
+        "privacy.section8.p1": 'لا تخاطب خدمتنا أي شخص يقل عمره عن 18 سنة ("الأطفال"). نحن لا نجمع عن علم معلومات تعريف شخصية من الأطفال.',
+        
+        "privacy.section9.title": "9. التغييرات على هذه السياسة",
+        "privacy.section9.p1": "قد نقوم بتحديث سياسة الخصوصية الخاصة بنا من وقت لآخر. سنخطرك بأي تغييرات عن طريق نشر سياسة الخصوصية الجديدة على هذه الصفحة وتحديث تاريخ 'آخر تحديث'.",
+        
+        "privacy.footer": "تم تحديث سياسة الخصوصية هذه آخر مرة في 1 يناير 2025.",
+        
+        // Footer
+        "footer.privacy": "سياسة الخصوصية",
+        "footer.terms": "شروط الخدمة",
+        "footer.refund": "سياسة الاسترداد",
+        "footer.contact": "اتصل بنا",
+        "footer.copyright": "© 2025 Clicksplore. جميع الحقوق محفوظة."
+      }
+    };
+
+    // Language management functions
+    let currentLanguage = localStorage.getItem('language') || 'en';
+
+    function setLanguage(lang) {
+      if (translations[lang]) {
+        currentLanguage = lang;
+        localStorage.setItem('language', lang);
+        updateContent();
+        updateDirection();
+        updateLanguageSwitcher();
+        closeLanguageMenu();
+      }
+    }
+
+    function updateContent() {
+      document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        if (translations[currentLanguage][key]) {
+          if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+            element.value = translations[currentLanguage][key];
+          } else {
+            element.innerHTML = translations[currentLanguage][key];
+          }
+        }
+      });
+    }
+
+    function updateDirection() {
+      if (currentLanguage === 'ar') {
+        document.documentElement.setAttribute('dir', 'rtl');
+        document.documentElement.setAttribute('lang', 'ar');
+      } else {
+        document.documentElement.setAttribute('dir', 'ltr');
+        document.documentElement.setAttribute('lang', 'en');
+      }
+    }
+
+    function updateLanguageSwitcher() {
+      const currentFlag = document.getElementById('currentFlag');
+      const currentLang = document.getElementById('currentLang');
+      
+      if (currentLanguage === 'ar') {
+        currentFlag.src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MCAzMCI+PHBhdGggZmlsbD0iI2NjMTEyMiIgZD0iTTAgMGg2MHYzMEgweiIvPjxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik0wIDBoNjB2MTBIMHptMCAyMGg2MHYxMEgweiIvPjxwYXRoIGZpbGw9IiMwMDAiIGQ9Ik0wIDEwaDYwdjEwSDB6Ii8+PC9zdmc+";
+        currentLang.textContent = "العربية";
+      } else {
+        currentFlag.src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MCAzMCI+PHBhdGggZmlsbD0iIzAyNDcwMSIgZD0iTTAgMGg2MHYzMEgweiIvPjxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik0wIDBoNjB2Nkgwem0wIDEyaDB2Nmg2MHYtNnptMCAxMmgtMHY2aDYwdi02eiIvPjxwYXRoIGZpbGw9IiNjZTExMjIiIGQ9Ik0wIDZoNjB2Nkgwem0wIDEyaDYwdjZIMHoiLz48cGF0aCBmaWxsPSIjMDI0NzAxIiBkPSJNMzAgMTV2LTFINjB2MTBIMzB2LTFoLTEwdjEwaC0xMHYtMTBoLTEwdjFIMHYtMTBoNjB2MTB6Ii8+PC9zdmc+";
+        currentLang.textContent = "English";
+      }
+    }
+
+    function toggleLanguageMenu() {
+      const menu = document.getElementById('langMenu');
+      if (menu.style.display === 'block') {
+        menu.style.display = 'none';
+      } else {
+        menu.style.display = 'block';
+      }
+    }
+
+    function closeLanguageMenu() {
+      document.getElementById('langMenu').style.display = 'none';
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize language
+      updateDirection();
+      updateContent();
+      updateLanguageSwitcher();
+      
+      // Language switcher click event
+      document.getElementById('langSwitcher').addEventListener('click', toggleLanguageMenu);
+      
+      // Close language menu when clicking outside
+      document.addEventListener('click', function(event) {
+        const langSwitcher = document.getElementById('langSwitcher');
+        const langMenu = document.getElementById('langMenu');
+        if (!langSwitcher.contains(event.target) && !langMenu.contains(event.target)) {
+          closeLanguageMenu();
+        }
+      });
+    });
+
+    // Navbar scroll effect (matches homepage)
+    window.addEventListener('scroll',()=>{
+      const nav=document.getElementById('navbar');
+      if(window.scrollY>80) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
+    });
+  </script>
+</body>
+</html>

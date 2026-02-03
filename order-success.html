@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Successful - Clicksplore</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .success-container {
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
+            animation: slideInUp 0.8s ease-out;
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            animation: bounce 1s ease-out;
+        }
+
+        .success-icon i {
+            font-size: 3rem;
+            color: white;
+        }
+
+        .success-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .success-subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .order-details {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .order-id {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .order-date {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .next-steps {
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .next-steps h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .next-steps ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .next-steps li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #666;
+        }
+
+        .next-steps li i {
+            color: #28a745;
+            width: 16px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .support-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 25px 0;
+            color: #856404;
+        }
+
+        .support-info h4 {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .success-container {
+                padding: 30px;
+                margin: 10px;
+            }
+
+            .success-title {
+                font-size: 2rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .order-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-icon">
+            <i class="fas fa-check"></i>
+        </div>
+
+        <h1 class="success-title">Order Successful!</h1>
+        <p class="success-subtitle">Thank you for your purchase. Your order has been processed successfully.</p>
+
+        <div class="order-details">
+            <div class="order-header">
+                <div>
+                    <div class="order-id">Order #<span id="orderId">Loading...</span></div>
+                </div>
+                <div class="order-date" id="orderDate">Loading...</div>
+            </div>
+            <div id="orderItems">Loading order details...</div>
+        </div>
+
+        <div class="next-steps">
+            <h3><i class="fas fa-list-check"></i> What happens next?</h3>
+            <ul>
+                <li><i class="fas fa-check"></i> You'll receive an email confirmation shortly</li>
+                <li><i class="fas fa-check"></i> Account credentials will be sent within 24 hours</li>
+                <li><i class="fas fa-check"></i> Support team will assist with account setup if needed</li>
+                <li><i class="fas fa-check"></i> Your subscriptions are active for 30 days</li>
+            </ul>
+        </div>
+
+        <div class="support-info">
+            <h4><i class="fas fa-info-circle"></i> Need Help?</h4>
+            <p>If you have any questions about your order or need assistance with your subscriptions, our support team is here to help 24/7.</p>
+        </div>
+
+        <div class="action-buttons">
+            <a href="/profile.html" class="btn btn-primary">
+                <i class="fas fa-user"></i>
+                View My Orders
+            </a>
+            <a href="/" class="btn btn-outline">
+                <i class="fas fa-home"></i>
+                Back to Home
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://hsomlteyiyjtusfqxfvh.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhzb21sdGV5aXlqdHVzZnF4ZnZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwMTUzMDgsImV4cCI6MjA3MDU5MTMwOH0.VEjhuylzTwja0crf7Cve9795J3L7QRvQ-8Zic04BtvY';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Load order details
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const orderId = urlParams.get('order');
+                
+                if (orderId) {
+                    await loadOrderDetails(orderId);
+                } else {
+                    // If no order ID, redirect home
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Error loading page:', error);
+                showError();
+            }
+        });
+
+        async function loadOrderDetails(orderId) {
+            try {
+                // Get order details with items
+                const { data: orderData, error: orderError } = await supabase
+                    .from('orders')
+                    .select(`
+                        id,
+                        total_amount,
+                        payment_status,
+                        payment_method,
+                        transaction_id,
+                        created_at,
+                        order_items (
+                            id,
+                            quantity,
+                            price,
+                            subscription_services (
+                                name,
+                                category,
+                                is_shared
+                            )
+                        )
+                    `)
+                    .eq('id', orderId)
+                    .single();
+
+                if (orderError || !orderData) {
+                    throw new Error('Order not found');
+                }
+
+                // Update UI with order details
+                document.getElementById('orderId').textContent = orderData.id;
+                document.getElementById('orderDate').textContent = new Date(orderData.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                // Render order items
+                renderOrderItems(orderData.order_items);
+
+                console.log('✅ Order details loaded successfully');
+
+            } catch (error) {
+                console.error('❌ Error loading order details:', error);
+                showError();
+            }
+        }
+
+        function renderOrderItems(orderItems) {
+            const container = document.getElementById('orderItems');
+            
+            if (!orderItems || orderItems.length === 0) {
+                container.innerHTML = '<p>No items found in this order.</p>';
+                return;
+            }
+
+            let itemsHTML = '';
+            let totalAmount = 0;
+
+            orderItems.forEach(item => {
+                const service = item.subscription_services;
+                const itemTotal = item.price * item.quantity;
+                totalAmount += itemTotal;
+
+                itemsHTML += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #e9ecef;">
+                        <div>
+                            <div style="font-weight: 600; color: #333;">${escapeHtml(service.name)}</div>
+                            <div style="font-size: 0.85rem; color: #666;">
+                                ${service.is_shared ? 'Shared Account' : 'Private Account'} • 
+                                ${service.category.charAt(0).toUpperCase() + service.category.slice(1)}
+                                ${item.quantity > 1 ? ` • Qty: ${item.quantity}` : ''}
+                            </div>
+                        </div>
+                        <div style="font-weight: 700; color: #667eea;">
+                            ${itemTotal.toFixed(2)}
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Add total
+            itemsHTML += `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; font-size: 1.1rem; font-weight: 800; color: #333; border-top: 2px solid #e9ecef; margin-top: 10px;">
+                    <span>Total Paid:</span>
+                    <span style="color: #28a745;">${totalAmount.toFixed(2)}</span>
+                </div>
+            `;
+
+            container.innerHTML = itemsHTML;
+        }
+
+        function showError() {
+            const container = document.querySelector('.success-container');
+            container.innerHTML = `
+                <div class="success-icon" style="background: linear-gradient(135deg, #dc3545, #c82333);">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h1 class="success-title" style="color: #dc3545;">Order Not Found</h1>
+                <p class="success-subtitle">Sorry, we couldn't find your order details. Please contact support if you need assistance.</p>
+                <div class="action-buttons">
+                    <a href="/" class="btn btn-primary">
+                        <i class="fas fa-home"></i>
+                        Back to Home
+                    </a>
+                    <a href="mailto:support@clicksplore.com" class="btn btn-outline">
+                        <i class="fas fa-envelope"></i>
+                        Contact Support
+                    </a>
+                </div>
+            `;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+    </script>
+</body>
+</html>

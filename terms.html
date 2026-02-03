@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Terms of Service | Clicksplore</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --hot:#ff00ff;--indigo:#08003d;--violet:#8c00ff;
+      --glass-1:rgba(11,8,32,.78);--glass-2:rgba(11,8,32,.64);
+      --white:#ffffff;--text:#eef0ff;--muted:rgba(255,255,255,.8);
+      --line:rgba(255,255,255,.16);--line-2:rgba(255,255,255,.22);
+      --success:#28a745; --danger:#dc3545; --warning:#ffb703;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      font-family:'Inter',system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      line-height:1.7;color:var(--text);
+      background:
+        radial-gradient(1200px 800px at 10% 10%, rgba(255,0,255,.15), transparent 60%),
+        radial-gradient(1000px 700px at 90% 20%, rgba(140,0,255,.15), transparent 60%),
+        linear-gradient(135deg,var(--hot) 0%, var(--indigo) 100%);
+      background-attachment: fixed;overflow-x:hidden;
+    }
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;
+      background: conic-gradient(from 180deg at 70% -20%, rgba(255,255,255,.08), rgba(0,0,0,0) 40%),
+                  radial-gradient(800px 300px at 50% -5%, rgba(255,255,255,.08), transparent 60%);
+      mix-blend-mode: screen;opacity:.8}
+
+    /* Navigation - glass + neon underline */
+    nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:18px 0;transition:.25s ease;
+      background:rgba(8,0,61,.18);backdrop-filter:blur(14px);border-bottom:1px solid transparent}
+    nav.scrolled{background:rgba(8,0,61,.6);border-color:var(--line)}
+    .nav-container{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 20px;gap:16px}
+    .logo{font-size:1.6rem;font-weight:900;letter-spacing:.3px;text-decoration:none;
+      background:linear-gradient(45deg,var(--hot),#9b5cff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .nav-links{list-style:none;display:flex;gap:26px}
+    .nav-links a{color:var(--text);text-decoration:none;position:relative}
+    .nav-links a:after{content:"";position:absolute;left:0;bottom:-6px;height:2px;width:0;background:linear-gradient(90deg,var(--hot),#9b5cff);transition:width .25s}
+    .nav-links a:hover:after{width:100%}
+
+    /* Container */
+    .terms-container{max-width:980px;margin:0 auto;padding:140px 20px 100px}
+
+    .terms-header{text-align:center;margin-bottom:32px}
+    .terms-header h1{font-size:2.6rem;line-height:1.1;font-weight:900;color:#fff;margin-bottom:10px}
+    .terms-header p{color:var(--muted);font-size:1.05rem}
+
+    /* Glass card */
+    .terms-content{
+      background:var(--glass-1);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:36px;
+      box-shadow:0 24px 60px rgba(0,0,0,.35);
+    }
+    .terms-section{margin-bottom:28px}
+    .terms-section h2{
+      font-size:1.35rem;font-weight:900;color:#fff;margin-bottom:10px;
+      padding-bottom:10px;border-bottom:1px dashed var(--line)
+    }
+    .terms-section h3{font-size:1.05rem;color:#ffd26f;margin:18px 0 8px}
+    .terms-section p,
+    .terms-section ul{color:var(--muted)}
+    .terms-section ul{padding-left:18px}
+    .terms-section li{margin-bottom:8px}
+
+    .last-updated{margin-top:28px;text-align:center;color:var(--muted);font-style:italic}
+
+    /* Footer */
+    footer{
+      background:rgba(11,8,32,.75);
+      border-top:1px solid var(--line);
+      color:var(--text);
+      padding:54px 20px 24px;
+      text-align:center;
+      backdrop-filter:blur(10px)
+    }
+    .footer-links{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;margin-bottom:14px}
+    .footer-links a{color:var(--text);text-decoration:none;position:relative}
+    .footer-links a:after{content:"";position:absolute;left:0;bottom:-6px;height:2px;width:0;background:linear-gradient(90deg,var(--hot),#9b5cff);transition:width .25s}
+    .footer-links a:hover:after{width:100%}
+
+    /* Responsive */
+    @media (max-width: 768px){
+      .nav-links{display:none}
+      .terms-container{padding:120px 16px 80px}
+      .terms-content{padding:24px}
+      .terms-header h1{font-size:2rem}
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav id="navbar">
+    <div class="nav-container">
+      <a href="test3.html" class="logo">Clicksplore</a>
+      <ul class="nav-links">
+        <li><a href="test3.html">Home</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="faq.html">FAQs</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Terms Content -->
+  <div class="terms-container">
+    <div class="terms-header">
+      <h1>Terms of Service</h1>
+      <p>Last Updated: January 1, 2025</p>
+    </div>
+
+    <div class="terms-content">
+      <div class="terms-section">
+        <h2>1. Acceptance of Terms</h2>
+        <p>By accessing or using the Clicksplore website ("Service"), you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of the terms, you may not access the Service.</p>
+      </div>
+
+      <div class="terms-section">
+        <h2>2. Service Description</h2>
+        <p>Clicksplore provides shared access to premium digital subscriptions at reduced costs. We manage family/group plans and distribute access credentials to authorized users.</p>
+      </div>
+
+      <div class="terms-section">
+        <h2>3. User Responsibilities</h2>
+        <h3>3.1 Account Usage</h3>
+        <p>You agree to:</p>
+        <ul>
+          <li>Use accounts solely for personal, non-commercial purposes</li>
+          <li>Not share credentials with unauthorized third parties</li>
+          <li>Not attempt to modify or transfer ownership of shared accounts</li>
+        </ul>
+
+        <h3>3.2 Prohibited Activities</h3>
+        <p>You may not:</p>
+        <ul>
+          <li>Use accounts for illegal activities or content sharing</li>
+          <li>Attempt to bypass regional restrictions or DRM protections</li>
+          <li>Resell or redistribute access credentials</li>
+        </ul>
+      </div>
+
+      <div class="terms-section">
+        <h2>4. Payments & Refunds</h2>
+        <h3>4.1 Subscription Fees</h3>
+        <p>All fees are prepaid and non-refundable except as required by law. We reserve the right to modify pricing with 30 days notice.</p>
+
+        <h3>4.2 Refund Policy</h3>
+        <p>We offer a 30-day money-back guarantee for first-time subscribers if service is unsatisfactory. Refund requests must be submitted via our support system.</p>
+      </div>
+
+      <div class="terms-section">
+        <h2>5. Service Availability</h2>
+        <p>While we strive for 100% uptime, we cannot guarantee uninterrupted access. Service may be temporarily unavailable for maintenance or due to factors beyond our control.</p>
+      </div>
+
+      <div class="terms-section">
+        <h2>6. Limitation of Liability</h2>
+        <p>Clicksplore shall not be liable for any indirect, incidental, special or consequential damages resulting from:</p>
+        <ul>
+          <li>Use or inability to use the Service</li>
+          <li>Unauthorized access to or alteration of your data</li>
+          <li>Termination or suspension of your account</li>
+        </ul>
+      </div>
+
+      <div class="terms-section">
+        <h2>7. Modifications to Terms</h2>
+        <p>We reserve the right to modify these Terms at any time. Continued use after changes constitutes acceptance. Material changes will be notified via email.</p>
+      </div>
+
+      <div class="terms-section">
+        <h2>8. Governing Law</h2>
+        <p>These Terms shall be governed by the algerian laws, without regard to its conflict of law provisions.</p>
+      </div>
+
+      <div class="last-updated">
+        <p>These Terms of Service were last updated on January 1, 2025.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-links">
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+      <a href="profile.html">Refund Policy</a>
+      <a href="contact.html">Contact Us</a>
+    </div>
+    <p>&copy; 2025 Clicksplore. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Navbar scroll glass intensifier
+    window.addEventListener('scroll', () => {
+      const navbar = document.getElementById('navbar');
+      if (!navbar) return;
+      if (window.scrollY > 100) navbar.classList.add('scrolled');
+      else navbar.classList.remove('scrolled');
+    });
+  </script>
+</body>
+</html>

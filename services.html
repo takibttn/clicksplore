@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Previous head content remains the same -->
+    <!-- ... -->
+</head>
+<body>
+    <!-- Previous HTML content remains the same until the script section -->
+    <!-- ... -->
+
+    <div id="product-grid" class="product-grid-container">
+        <!-- Products will be loaded here -->
+    </div>
+
+
+    <script>
+        // Initialize Supabase with credentials from config
+        const supabaseUrl = 'https://hsomlteyiyjtusfqxfvh.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhzb21sdGV5aXlqdHVzZnF4ZnZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwMTUzMDgsImV4cCI6MjA3MDU5MTMwOH0.VEjhuylzTwja0crf7Cve9795J3L7QRvQ-8Zic04BtvY';
+        
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Global variables
+        let cartItems = [];
+        let allProducts = [];
+        let currentCategory = 'all';
+        let currentUser = null;
+        let isCartLoading = false;
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 Initializing Clicksplore...');
+            await initializeApp();
+        });
+
+        async function initializeApp() {
+            try {
+                // Setup event listeners
+                setupEventListeners();
+                
+                // Check for existing user session
+                await checkUserSession();
+                
+                // Load products
+                await loadProducts();
+                
+                // Load cart from database if user is logged in
+                if (currentUser) {
+                    await loadCartFromDatabase();
+                }
+                
+                console.log('✅ App initialized successfully');
+            } catch (error) {
+                console.error('❌ Error initializing app:', error);
+                showToast('Application failed to initialize', 'error');
+            }
+        }
+
+        // Load products from the backend API
+        async function loadProducts() {
+            console.log('🔄 Loading products...');
+            showLoading(); // Assumes a showLoading function exists
+
+            try {
+                // Use the server endpoint instead of direct Supabase access
+                const response = await fetch('/api/subscriptions');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const products = await response.json();
+                
+                allProducts = products; // Store in global variable
+                renderProducts(); // Render the fetched products
+                
+                console.log(`✅ Loaded ${allProducts.length} products successfully.`);
+
+            } catch (error) {
+                console.error('❌ Error loading products:', error);
+                showToast('Failed to load services. Please try again later.', 'error');
+                // Display an error message in the product grid
+                const container = document.getElementById('product-grid'); // Make sure you have a container with this ID
+                if(container) {
+                    container.innerHTML = '<p class="error-message">Could not load services at this time. Please check your connection and try again.</p>';
+                }
+            } finally {
+                hideLoading(); // Assumes a hideLoading function exists
+            }
+        }
+
+        // Render products to the DOM
+        function renderProducts() {
+            const container = document.getElementById('product-grid'); // Ensure this container exists in your HTML
+            if (!container) {
+                console.error('Product grid container not found!');
+                return;
+            }
+
+            const filteredProducts = currentCategory === 'all' 
+                ? allProducts 
+                : allProducts.filter(p => p.category === currentCategory);
+
+            if (filteredProducts.length === 0) {
+                container.innerHTML = '<p>No services available in this category.</p>';
+                return;
+            }
+
+            container.innerHTML = filteredProducts.map(product => {
+                const isInCart = cartItems.some(item => item.id === product.id);
+                const buttonHtml = isInCart
+                    ? `<button class="add-to-cart-btn" disabled style="background: #6c757d;"><i class="fas fa-check"></i> In Cart</button>`
+                    : `<button class="add-to-cart-btn" onclick="addToCart(${product.id})"><i class="fas fa-cart-plus"></i> Add to Cart</button>`;
+
+                return `
+                    <div class="service-card" data-id="${product.id}">
+                        <img src="${escapeHtml(product.logo_url || 'placeholder.png')}" alt="${escapeHtml(product.name)} Logo" class="service-logo">
+                        <div class="service-info">
+                            <h3>${escapeHtml(product.name)}</h3>
+                            <p class="service-description">${escapeHtml(product.description)}</p>
+                            <div class="price-container">
+                                <span class="current-price">$${product.our_price.toFixed(2)}</span>
+                                <span class="original-price">$${product.original_price.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <div class="service-actions">
+                            ${buttonHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Utility to escape HTML to prevent XSS
+        function escapeHtml(str) {
+            return str.toString()
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // ================== IMPROVED CART FUNCTIONS ==================
+
+        // Load cart items from database with better error handling
+        async function loadCartFromDatabase() {
+            if (!currentUser || isCartLoading) return;
+
+            isCartLoading = true;
+            showLoading();
+            
+            try {
+                console.log('🔄 Loading cart from database for user:', currentUser.id);
+                
+                const { data, error } = await supabase
+                    .from('cart_items')
+                    .select(`
+                        *,
+                        subscription_services (
+                            id,
+                            name,
+                            description,
+                            our_price,
+                            original_price,
+                            logo_url,
+                            category,
+                            is_shared,
+                            max_users_per_account
+                        )
+                    `)
+                    .eq('user_id', currentUser.id)
+                    .order('added_at', { ascending: false });
+
+                if (error) {
+                    throw error;
+                }
+
+                // Transform database cart items to match frontend format
+                cartItems = data.map(item => ({
+                    id: item.service_id,
+                    cartItemId: item.id, // Store the cart_items table ID
+                    name: item.subscription_services.name,
+                    price: item.subscription_services.our_price,
+                    original_price: item.subscription_services.original_price,
+                    logo_url: item.subscription_services.logo_url,
+                    category: item.subscription_services.category,
+                    quantity: item.quantity,
+                    is_shared: item.subscription_services.is_shared,
+                    max_users_per_account: item.subscription_services.max_users_per_account,
+                    added_at: item.added_at,
+                    updated_at: item.updated_at
+                }));
+
+                updateCartCount();
+                renderProducts(); // Update product buttons
+                console.log(`✅ Loaded ${cartItems.length} items from cart database`);
+
+            } catch (error) {
+                console.error('❌ Error loading cart from database:', error);
+                showToast('Failed to load cart items', 'error');
+                cartItems = [];
+                updateCartCount();
+            } finally {
+                isCartLoading = false;
+                hideLoading();
+            }
+        }
+
+        // Enhanced add to cart function with better state management
+        async function addToCart(productId, quantity = 1) {
+            try {
+                const product = allProducts.find(p => p.id === productId);
+                if (!product) {
+                    showToast('Product not found', 'error');
+                    return;
+                }
+
+                if (!currentUser) {
+                    showToast('Please login to add items to your cart', 'error');
+                    openModal('loginModal');
+                    return;
+                }
+
+                // Check if already in cart
+                const existingItem = cartItems.find(item => item.id === productId);
+                if (existingItem) {
+                    await updateCartItemDatabase(existingItem.cartItemId, existingItem.quantity + quantity);
+                    showToast(`Increased quantity of ${product.name} in cart`, 'success');
+                    return;
+                }
+
+                // Add to database
+                showLoading();
+                const dbCartItem = await addToCartDatabase(productId, quantity);
+                
+                // Add to local cart array
+                const cartItem = {
+                    id: product.id,
+                    cartItemId: dbCartItem.id,
+                    name: product.name,
+                    price: product.our_price,
+                    original_price: product.original_price,
+                    logo_url: product.logo_url,
+                    category: product.category,
+                    quantity: quantity,
+                    is_shared: product.is_shared,
+                    max_users_per_account: product.max_users_per_account
+                };
+
+                cartItems.push(cartItem);
+                updateCartCount();
+                showToast(`${product.name} added to cart!`, 'success');
+                
+                // Update button state
+                updateProductButtonState(productId, true);
+                
+                console.log(`✅ Added ${product.name} to cart`);
+                
+            } catch (error) {
+                console.error('❌ Error adding to cart:', error);
+                showToast('Failed to add to cart. Please try again.', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Update product button state
+        function updateProductButtonState(productId, isInCart) {
+            const buttons = document.querySelectorAll(`.service-card[data-id="${productId}"] .add-to-cart-btn`);
+            
+            buttons.forEach(button => {
+                if (isInCart) {
+                    button.innerHTML = '<i class="fas fa-check"></i> In Cart';
+                    button.style.background = '#6c757d';
+                    button.disabled = true;
+                } else {
+                    button.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
+                    button.style.background = ''; // Reset to default
+                    button.disabled = false;
+                }
+            });
+        }
+
+        // Enhanced add to cart database function with retry logic
+        async function addToCartDatabase(serviceId, quantity = 1) {
+            if (!currentUser) {
+                throw new Error('User must be logged in');
+            }
+
+            try {
+                // First check if item already exists in cart
+                const { data: existingItem, error: checkError } = await supabase
+                    .from('cart_items')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .eq('service_id', serviceId)
+                    .single();
+
+                if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned
+                    throw checkError;
+                }
+
+                if (existingItem) {
+                    // Update quantity if item exists
+                    const newQuantity = existingItem.quantity + quantity;
+                    const { data, error } = await supabase
+                        .from('cart_items')
+                        .update({ 
+                            quantity: newQuantity,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', existingItem.id)
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+                    
+                    console.log('✅ Updated cart item quantity in database');
+                    return data;
+                } else {
+                    // Insert new item
+                    const { data, error } = await supabase
+                        .from('cart_items')
+                        .insert({
+                            user_id: currentUser.id,
+                            service_id: serviceId,
+                            quantity: quantity
+                        })
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+                    
+                    console.log('✅ Added new item to cart database');
+                    return data;
+                }
+
+            } catch (error) {
+                console.error('❌ Error adding to cart database:', error);
+                
+                // Retry once if it's a network error
+                if (error.message.includes('fetch') || error.message.includes('network')) {
+                    console.log('🔄 Retrying cart database operation...');
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    return addToCartDatabase(serviceId, quantity);
+                }
+                
+                throw error;
+            }
+        }
+
+        // Enhanced update cart item quantity with validation
+        async function updateCartItemDatabase(cartItemId, newQuantity) {
+            if (!currentUser) {
+                throw new Error('User must be logged in');
+            }
+
+            // Validate quantity
+            newQuantity = Math.max(1, Math.min(newQuantity, 10)); // Limit to 1-10
+
+            try {
+                if (newQuantity <= 0) {
+                    // Remove item if quantity is 0 or less
+                    await removeFromCartDatabase(cartItemId);
+                    return null;
+                }
+
+                // Update quantity
+                const { data, error } = await supabase
+                    .from('cart_items')
+                    .update({ 
+                        quantity: newQuantity,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', cartItemId)
+                    .eq('user_id', currentUser.id) // Security: ensure user owns the item
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                
+                console.log('✅ Updated cart item quantity in database');
+                return data;
+
+            } catch (error) {
+                console.error('❌ Error updating cart item in database:', error);
+                
+                // Retry once if it's a network error
+                if (error.message.includes('fetch') || error.message.includes('network')) {
+                    console.log('🔄 Retrying cart update operation...');
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    return updateCartItemDatabase(cartItemId, newQuantity);
+                }
+                
+                throw error;
+            }
+        }
+
+        // Enhanced remove from cart function
+        async function removeFromCartDatabase(cartItemId) {
+            if (!currentUser) {
+                throw new Error('User must be logged in');
+            }
+
+            try {
+                const { error } = await supabase
+                    .from('cart_items')
+                    .delete()
+                    .eq('id', cartItemId)
+                    .eq('user_id', currentUser.id); // Security: ensure user owns the item
+
+                if (error) throw error;
+                
+                console.log('✅ Removed cart item from database');
+
+            } catch (error) {
+                console.error('❌ Error removing from cart database:', error);
+                
+                // Retry once if it's a network error
+                if (error.message.includes('fetch') || error.message.includes('network')) {
+                    console.log('🔄 Retrying cart removal operation...');
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    return removeFromCartDatabase(cartItemId);
+                }
+                
+                throw error;
+            }
+        }
+
+        // Enhanced clear cart function
+        async function clearCartDatabase() {
+            if (!currentUser) {
+                throw new Error('User must be logged in');
+            }
+
+            try {
+                const { error } = await supabase
+                    .from('cart_items')
+                    .delete()
+                    .eq('user_id', currentUser.id);
+
+                if (error) throw error;
+                
+                console.log('✅ Cleared cart from database');
+
+            } catch (error) {
+                console.error('❌ Error clearing cart database:', error);
+                
+                // Retry once if it's a network error
+                if (error.message.includes('fetch') || error.message.includes('network')) {
+                    console.log('🔄 Retrying cart clear operation...');
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    return clearCartDatabase();
+                }
+                
+                throw error;
+            }
+        }
+
+        // Enhanced open cart function with loading state
+        async function openCart() {
+            if (!currentUser) {
+                showToast('Please login to view your cart', 'error');
+                openModal('loginModal');
+                return;
+            }
+            
+            // Refresh cart from database
+            try {
+                showLoading();
+                await loadCartFromDatabase();
+            } catch (error) {
+                console.error('Error refreshing cart:', error);
+            } finally {
+                hideLoading();
+            }
+            
+            if (cartItems.length === 0) {
+                showToast('Your cart is empty', 'info');
+                return;
+            }
+            
+            // Create enhanced cart modal
+            const cartModal = document.createElement('div');
+            cartModal.className = 'cart-modal';
+            cartModal.onclick = function(e) {
+                if (e.target === cartModal) {
+                    cartModal.remove();
+                }
+            };
+
+            let cartHTML = `
+                <div class="cart-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                        <h3 style="margin: 0; color: #333;">Your Cart (${cartItems.length} items)</h3>
+                        <span style="font-size: 1.5rem; cursor: pointer; color: #999;" onclick="this.closest('.cart-modal').remove()">&times;</span>
+                    </div>
+                    <div style="max-height: 400px; overflow-y: auto;">
+            `;
+            
+            let total = 0;
+            
+            cartItems.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                
+                cartHTML += `
+                    <div class="cart-item" data-cart-id="${item.cartItemId}">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${escapeHtml(item.name)}</div>
+                            <div class="cart-item-price">$${item.price.toFixed(2)}/month × ${item.quantity} = $${itemTotal.toFixed(2)}</div>
+                        </div>
+                        <div class="cart-item-actions">
+                            <div class="quantity-controls">
+                                <button class="quantity-btn" onclick="updateCartQuantity(${item.cartItemId}, ${item.quantity - 1})">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <span class="quantity-display">${item.quantity}</span>
+                                <button class="quantity-btn" onclick="updateCartQuantity(${item.cartItemId}, ${item.quantity + 1})">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <button class="remove-btn" onclick="removeFromCart(${item.cartItemId})">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            cartHTML += `
+                    </div>
+                    <div class="cart-summary">
+                        <div class="cart-total">Total: $${total.toFixed(2)}/month</div>
+                        <button class="checkout-btn" onclick="proceedToCheckout()">
+                            <i class="fas fa-credit-card"></i> Proceed to Checkout
+                        </button>
+                        <div style="margin-top: 15px;">
+                            <button onclick="clearCart()" style="background: #dc3545; color: white; padding: 8px 16px; border: none; border-radius: 20px; cursor: pointer; font-size: 0.9rem;">
+                                <i class="fas fa-trash"></i> Clear Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            cartModal.innerHTML = cartHTML;
+            document.body.appendChild(cartModal);
+        }
+
+        // Enhanced update cart quantity function
+        async function updateCartQuantity(cartItemId, newQuantity) {
+            try {
+                if (newQuantity < 1) {
+                    await removeFromCart(cartItemId);
+                    return;
+                }
+
+                showLoading();
+                
+                // Update in database
+                const updatedItem = await updateCartItemDatabase(cartItemId, newQuantity);
+                
+                if (!updatedItem) return; // Item was removed
+                
+                // Update local array
+                const cartItem = cartItems.find(item => item.cartItemId === cartItemId);
+                if (cartItem) {
+                    cartItem.quantity = newQuantity;
+                }
+                
+                // Re-render cart
+                const modal = document.querySelector('.cart-modal');
+                if (modal) {
+                    modal.remove();
+                    setTimeout(() => openCart(), 300);
+                }
+                
+                showToast('Cart updated', 'success');
+                
+            } catch (error) {
+                console.error('❌ Error updating cart quantity:', error);
+                showToast('Failed to update cart. Please try again.', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Enhanced remove from cart function
+        async function removeFromCart(cartItemId) {
+            try {
+                showLoading();
+                
+                // Remove from database
+                await removeFromCartDatabase(cartItemId);
+                
+                // Remove from local array
+                const removedItem = cartItems.find(item => item.cartItemId === cartItemId);
+                cartItems = cartItems.filter(item => item.cartItemId !== cartItemId);
+                updateCartCount();
+                
+                // Update product button state
+                if (removedItem) {
+                    updateProductButtonState(removedItem.id, false);
+                }
+                
+                // Re-render cart if items remain
+                const modal = document.querySelector('.cart-modal');
+                if (modal) {
+                    modal.remove();
+                    if (cartItems.length > 0) {
+                        setTimeout(() => openCart(), 300);
+                    }
+                }
+                
+                showToast('Product removed from cart', 'success');
+                
+            } catch (error) {
+                console.error('❌ Error removing from cart:', error);
+                showToast('Failed to remove item. Please try again.', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Enhanced clear cart function
+        async function clearCart() {
+            if (!confirm('Are you sure you want to clear your entire cart?')) {
+                return;
+            }
+            
+            try {
+                showLoading();
+                
+                // Clear from database
+                await clearCartDatabase();
+                
+                // Update product button states
+                cartItems.forEach(item => {
+                    updateProductButtonState(item.id, false);
+                });
+                
+                // Clear local array
+                cartItems = [];
+                updateCartCount();
+                
+                // Close cart modal
+                const modal = document.querySelector('.cart-modal');
+                if (modal) {
+                    modal.remove();
+                }
+                
+                showToast('Cart cleared', 'success');
+                
+            } catch (error) {
+                console.error('❌ Error clearing cart:', error);
+                showToast('Failed to clear cart. Please try again.', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Enhanced proceed to checkout function
+        async function proceedToCheckout() {
+            if (cartItems.length === 0) {
+                showToast('Your cart is empty', 'error');
+                return;
+            }
+            
+            try {
+                showLoading();
+                showToast('Preparing secure checkout...', 'success');
+                
+                // Store cart data in session for checkout page
+                try {
+                    sessionStorage.setItem('checkoutCart', JSON.stringify({
+                        items: cartItems,
+                        total: calculateCartTotal(),
+                        user: currentUser ? currentUser.id : null
+                    }));
+                } catch (e) {
+                    console.warn('Could not save checkout data to sessionStorage');
+                }
+                
+                // Redirect to checkout.html
+                window.location.href = 'checkout.html';
+                
+            } catch (error) {
+                console.error('❌ Error during checkout:', error);
+                showToast('Failed to proceed to checkout. Please try again.', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Calculate cart total
+        function calculateCartTotal() {
+            return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+        }
+
+        // Update cart count in UI
+        function updateCartCount() {
+            const cartCount = document.getElementById('cartCount');
+            const count = cartItems.reduce((total, item) => total + item.quantity, 0);
+            if (cartCount) {
+                cartCount.textContent = count;
+                cartCount.style.display = count > 0 ? 'flex' : 'none';
+                
+                // Add animation when count changes
+                if (count > 0) {
+                    cartCount.classList.add('animate-bounce');
+                    setTimeout(() => cartCount.classList.remove('animate-bounce'), 500);
+                }
+            }
+        }
+
+        // Rest of the code remains the same...
+        // ... (keep all other existing functions)
+
+        // Make cart functions available globally
+        window.addToCart = addToCart;
+        window.openCart = openCart;
+        window.updateCartQuantity = updateCartQuantity;
+        window.removeFromCart = removeFromCart;
+        window.clearCart = clearCart;
+        window.proceedToCheckout = proceedToCheckout;
+
+        // Add CSS for bounce animation
+        const style = document.createElement('style');
+        style.textContent = `
+            .animate-bounce {
+                animation: bounce 0.5s;
+            }
+            @keyframes bounce {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.3); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

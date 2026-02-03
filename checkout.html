@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Clicksplore</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Your existing CSS remains unchanged */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .checkout-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
+            animation: slideInUp 0.8s ease-out;
+        }
+
+        .checkout-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .checkout-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        .currency-toggle-header {
+            position: absolute;
+            top: 50%;
+            right: 30px;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 12px 20px;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .currency-toggle-header:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .currency-toggle-header.active-da {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.3), rgba(255, 107, 107, 0.15));
+            border-color: rgba(255, 107, 107, 0.5);
+        }
+
+        .currency-toggle-header i {
+            font-size: 1.1rem;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .currency-toggle-header span {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: white;
+            letter-spacing: 0.5px;
+        }
+
+        .checkout-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .checkout-header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .checkout-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 0;
+            min-height: 600px;
+        }
+
+        .checkout-form {
+            padding: 40px;
+        }
+
+        .checkout-sidebar {
+            background: #f8f9fa;
+            padding: 40px;
+            border-left: 1px solid #e9ecef;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px 18px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .payment-method {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .payment-method:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.15);
+        }
+
+        .payment-method.active {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .payment-method i {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .payment-method span {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .order-summary {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .item-details {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .item-price {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .order-total {
+            border-top: 2px solid #e9ecef;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .total-row.discount {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .total-row.final {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #333;
+            border-top: 1px solid #e9ecef;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .promo-section {
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .promo-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .promo-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .promo-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .promo-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-1px);
+        }
+
+        .promo-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .promo-success {
+            margin-top: 10px;
+            padding: 10px 15px;
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .checkout-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .checkout-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .security-badges {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .security-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #28a745;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .security-badge i {
+            color: #28a745;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: white;
+        }
+
+        .loading-spinner {
+            font-size: 3rem;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .error-message, .success-message {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            display: none;
+            font-weight: 500;
+        }
+
+        .error-message {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+
+        .success-message {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            color: #5a6fd8;
+            transform: translateX(-5px);
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            width: 75%;
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+
+        .trust-indicators {
+            display: flex;
+            justify-content: space-around;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 12px;
+        }
+
+        .trust-item {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .trust-item i {
+            display: block;
+            font-size: 1.5rem;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .ccp-info {
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .ccp-info h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ccp-info p {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .payment-instructions {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #28a745;
+        }
+
+        .payment-instructions h4 {
+            color: #28a745;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .payment-instructions ol {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        .payment-instructions li {
+            margin-bottom: 10px;
+        }
+
+        .whatsapp-telegram {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .whatsapp-btn, .telegram-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            color: white;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .whatsapp-btn {
+            background: #25D366;
+        }
+
+        .whatsapp-btn:hover {
+            background: #128C7E;
+            transform: translateY(-2px);
+        }
+
+        .telegram-btn {
+            background: #0088cc;
+        }
+
+        .telegram-btn:hover {
+            background: #006DA0;
+            transform: translateY(-2px);
+        }
+
+        .flexy-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        /* Animations */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .checkout-content {
+                grid-template-columns: 1fr;
+            }
+
+            .checkout-sidebar {
+                border-left: none;
+                border-top: 1px solid #e9ecef;
+                order: -1;
+            }
+
+            .checkout-form, .checkout-sidebar {
+                padding: 25px;
+            }
+
+            .checkout-header h1 {
+                font-size: 2rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .payment-methods {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .trust-indicators {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .whatsapp-telegram {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .checkout-header {
+                padding: 20px;
+            }
+
+            .checkout-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+
+            .security-badges {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        /* Wallet Info Styles */
+        .wallet-info {
+            background: rgba(255, 210, 111, 0.1);
+            border: 1px solid rgba(255, 210, 111, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .wallet-balance, .wallet-note {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .wallet-balance {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #ffd26f;
+        }
+        .wallet-note {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        .wallet-balance i, .wallet-note i {
+            width: 16px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="checkout-container">
+        <!-- Header -->
+        <div class="checkout-header">
+            <h1><i class="fas fa-lock"></i> Secure Checkout</h1>
+            <p>Complete your purchase safely and securely</p>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <!-- Currency Toggle -->
+            <div class="currency-toggle-header" id="currencyToggle" title="Toggle Currency">
+                <i class="fa-solid fa-coins"></i>
+                <span id="currencyLabel">USDT</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="checkout-content">
+            <!-- Checkout Form -->
+            <div class="checkout-form">
+                <a href="/" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Shop
+                </a>
+
+                <div id="errorMessage" class="error-message"></div>
+                <div id="successMessage" class="success-message"></div>
+
+                <form id="checkoutForm">
+                    <!-- Billing Information -->
+                    <div class="section-title">
+                        <i class="fas fa-user"></i>
+                        Billing Information
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName" class="form-label">First Name *</label>
+                            <input type="text" id="firstName" name="firstName" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName" class="form-label">Last Name *</label>
+                            <input type="text" id="lastName" name="lastName" class="form-input" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address *</label>
+                        <input type="email" id="email" name="email" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone" class="form-label">Phone Number *</label>
+                        <input type="tel" id="phone" name="phone" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address" class="form-label">Address *</label>
+                        <input type="text" id="address" name="address" class="form-input" placeholder="Street address" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="city" class="form-label">City *</label>
+                            <input type="text" id="city" name="city" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="country" class="form-label">Country *</label>
+                            <select id="country" name="country" class="form-input" required>
+                                <option value="">Select Country</option>
+                                <option value="DZ" selected>Algeria</option>
+                                <option value="MA">Morocco</option>
+                                <option value="TN">Tunisia</option>
+                                <option value="EG">Egypt</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="section-title">
+                        <i class="fas fa-credit-card"></i>
+                        Payment Method
+                    </div>
+
+                    <div class="payment-methods">
+                        <div class="payment-method active" data-method="baridimob" onclick="selectPaymentMethod('baridimob')">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Baridimob</span>
+                        </div>
+                        <div class="payment-method" data-method="flexy" onclick="selectPaymentMethod('flexy')">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Flexy</span>
+                        </div>
+                        <div class="payment-method" data-method="chargily" onclick="selectPaymentMethod('chargily')">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Chargily (Online)</span>
+                        </div>
+                        <div class="payment-method" data-method="wallet" onclick="selectPaymentMethod('wallet')">
+                            <i class="fas fa-wallet"></i>
+                            <span>Wallet</span>
+                        </div>
+                    </div>
+
+                    <!-- Baridimob Details -->
+                    <div id="baridimobDetails" class="payment-details">
+                        <div class="form-group">
+                            <label for="ccpNumber" class="form-label">CCP Number *</label>
+                            <input type="text" id="ccpNumber" name="ccpNumber" class="form-input" placeholder="Your CCP account number">
+                        </div>
+
+                        <div class="ccp-info">
+                            <h4><i class="fas fa-info-circle"></i> Payment Instructions</h4>
+                            <p>After placing your order, you will need to transfer the payment amount to our CCP account:</p>
+                            <p><strong>CCP Account:</strong> 123 456 78 90 (Clicksplore Services)</p>
+                            <p><strong>Important:</strong> Please include your order ID in the transfer reference.</p>
+                            <p>Your order will be activated once the payment is confirmed (usually within 24 hours).</p>
+                        </div>
+
+                        <div class="payment-instructions">
+                            <h4><i class="fas fa-list-ol"></i> Complete Payment Process</h4>
+                            <ol>
+                                <li>Complete the order form and click "Complete Order"</li>
+                                <li>Transfer the total amount to our CCP account: <strong>123 456 78 90</strong></li>
+                                <li>Take a screenshot of the payment confirmation</li>
+                                <li>Send the screenshot via WhatsApp or Telegram using the buttons below</li>
+                            </ol>
+                            
+                            <div class="whatsapp-telegram">
+                                <a href="https://wa.me/213123456789?text=Hello%20Clicksplore,%20I%20have%20made%20a%20payment%20via%20Baridimob" class="whatsapp-btn" target="_blank">
+                                    <i class="fab fa-whatsapp"></i> Send via WhatsApp
+                                </a>
+                                <a href="https://t.me/clicksplore" class="telegram-btn" target="_blank">
+                                    <i class="fab fa-telegram"></i> Send via Telegram
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Flexy Details -->
+                    <div id="flexyDetails" class="payment-details" style="display: none;">
+                        <div class="payment-instructions">
+                            <h4><i class="fas fa-info-circle"></i> About Flexy Payment</h4>
+                            <p>Flexy allows you to pay in installments with a 20% service fee. Complete your purchase and then send us the time of the payment process.</p>
+                            
+                            <!-- Flexy Image Placeholder - Replace with actual image URL -->
+                            <img src="c:\Users\Admin\Downloads\5933999856823685143.jpg" alt="Flexy Payment Guide" class="flexy-image">
+                            
+                            <p><strong>Important:</strong> After completing your order, please send us the exact time when you initiated the Flexy payment process via WhatsApp or Telegram.</p>
+                            
+                            <div class="whatsapp-telegram">
+                                <a href="https://wa.me/213123456789?text=Hello%20Clicksplore,%20I%20have%20completed%20a%20Flexy%20payment%20at%20[TIME]" class="whatsapp-btn" target="_blank">
+                                    <i class="fab fa-whatsapp"></i> Send Payment Time
+                                </a>
+                                <a href="https://t.me/clicksplore" class="telegram-btn" target="_blank">
+                                    <i class="fab fa-telegram"></i> Send Payment Time
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chargily Details -->
+                    <div id="chargilyDetails" class="payment-details" style="display: none;">
+                        <div class="payment-instructions">
+                            <h4><i class="fas fa-info-circle"></i> Pay Online with Chargily</h4>
+                            <p>Pay securely online using your credit card or other payment methods through Chargily. You'll be redirected to the payment gateway.</p>
+                            
+                            <div class="security-badges" style="margin-top: 15px;">
+                                <div class="security-badge">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>Secure Payment</span>
+                                </div>
+                                <div class="security-badge">
+                                    <i class="fas fa-lock"></i>
+                                    <span>Encrypted</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Wallet Details -->
+                    <div id="walletDetails" class="payment-details" style="display: none;">
+                        <div class="payment-instructions">
+                            <h4><i class="fas fa-wallet"></i> Pay with Your Wallet</h4>
+                            <p>Pay using your available credits. Your credits will be deducted immediately and your subscriptions will be activated instantly.</p>
+                            
+                            <div class="wallet-info" style="margin-top: 15px;">
+                                <div class="wallet-balance">
+                                    <i class="fas fa-coins"></i>
+                                    <span>Available Credits: </span>
+                                    <span id="walletBalance">$0.00</span>
+                                </div>
+                                <div class="wallet-note">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span id="walletNote">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trust Indicators -->
+                    <div class="trust-indicators">
+                        <div class="trust-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Secure Payment</span>
+                        </div>
+                        <div class="trust-item">
+                            <i class="fas fa-undo"></i>
+                            <span>30-Day Refund</span>
+                        </div>
+                        <div class="trust-item">
+                            <i class="fas fa-headset"></i>
+                            <span>24/7 Support</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Order Summary Sidebar -->
+            <div class="checkout-sidebar">
+                <div class="section-title">
+                    <i class="fas fa-receipt"></i>
+                    Order Summary
+                </div>
+
+                <div class="order-summary">
+                    <div id="orderItems">
+                        <!-- Cart items will be loaded here -->
+                    </div>
+
+                    <div class="order-total">
+                        <div class="total-row">
+                            <span>Subtotal:</span>
+                            <span id="subtotal">$0.00</span>
+                        </div>
+                        <div class="total-row discount" id="discountRow" style="display: none;">
+                            <span>Discount:</span>
+                            <span id="discountAmount">-$0.00</span>
+                        </div>
+                        <div class="total-row">
+                            <span>Tax:</span>
+                            <span id="tax">$0.00</span>
+                        </div>
+                        <div class="total-row final">
+                            <span>Total:</span>
+                            <span id="totalAmount">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Promo Code Section -->
+                <div class="promo-section">
+                    <h4><i class="fas fa-tags"></i> Promo Code</h4>
+                    <div class="promo-input">
+                        <input type="text" id="promoCode" placeholder="Enter promo code" maxlength="20">
+                        <button type="button" class="promo-btn" onclick="applyPromoCode()">Apply</button>
+                    </div>
+                    <div id="promoSuccess" class="promo-success">
+                        <i class="fas fa-check-circle"></i>
+                        <span id="promoMessage"></span>
+                    </div>
+                </div>
+
+                <!-- Checkout Button -->
+                <button type="button" class="checkout-btn" id="checkoutBtn" onclick="processCheckout()">
+                    <i class="fas fa-lock"></i>
+                    Complete Order
+                </button>
+
+                <!-- Security Badges -->
+                <div class="security-badges">
+                    <div class="security-badge">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Secure Payment</span>
+                    </div>
+                    <div class="security-badge">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Verified</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner"></i>
+        </div>
+        <h3>Processing your order...</h3>
+        <p>Please don't close this window</p>
+    </div>
+
+    <script>
+        // Global variables
+        let cartItems = [];
+        let currentUser = null;
+        let orderId = null;
+        let appliedPromoCode = null;
+        let discountAmount = 0;
+        let selectedPaymentMethod = 'baridimob'; // Default payment method
+        let currency = 'usdt'; // 'usdt' or 'da'
+        let userCredits = 0;
+
+        // Currency toggle function
+        function toggleCurrency() {
+            currency = currency === 'usdt' ? 'da' : 'usdt';
+            localStorage.setItem('click_currency', currency);
+            updateCurrencyUI();
+            updateOrderSummary(cartItems);
+        }
+
+        function updateCurrencyUI() {
+            const label = document.getElementById('currencyLabel');
+            if (label) {
+                label.textContent = currency.toUpperCase();
+            }
+            const toggle = document.getElementById('currencyToggle');
+            if (toggle) {
+                if (currency === 'da') {
+                    toggle.classList.add('active-da');
+                } else {
+                    toggle.classList.remove('active-da');
+                }
+            }
+        }
+
+        // Convert price based on currency
+        function convertPrice(price) {
+            return currency === 'da' ? price * 230 : price;
+        }
+
+        // Function to select payment method
+        function selectPaymentMethod(method) {
+            // Remove active class from all payment methods
+            document.querySelectorAll('.payment-method').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to selected payment method
+            document.querySelector(`.payment-method[data-method="${method}"]`).classList.add('active');
+            
+            // Hide all payment details
+            document.querySelectorAll('.payment-details').forEach(item => {
+                item.style.display = 'none';
+            });
+            
+            // Show selected payment details
+            document.getElementById(`${method}Details`).style.display = 'block';
+
+             selectedPaymentMethod = method;
+            // Recalculate totals with new tax rate
+            updateOrderSummary(cartItems);
+            
+            // Update wallet info if wallet is selected
+            if (method === 'wallet') {
+                updateWalletInfo();
+            }
+        }
+
+        // Load user credits
+        async function loadUserCredits() {
+            try {
+                const response = await fetch('/api/profile', {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) return;
+                
+                const { profile } = await response.json();
+                userCredits = Number(profile?.credits || 0);
+                updateWalletInfo();
+            } catch (error) {
+                console.error('Error loading credits:', error);
+            }
+        }
+
+        // Update wallet info display
+        function updateWalletInfo() {
+            const balanceEl = document.getElementById('walletBalance');
+            const noteEl = document.getElementById('walletNote');
+            
+            if (!balanceEl || !noteEl) return;
+            
+            balanceEl.textContent = `$${userCredits.toFixed(2)}`;
+            
+            const total = calculateTotal();
+            const totalUsdt = currency === 'da' ? (total / 230) : total;
+            
+            if (userCredits >= totalUsdt) {
+                noteEl.textContent = 'Sufficient credits for this purchase';
+                noteEl.style.color = '#28a745';
+            } else {
+                noteEl.textContent = `Insufficient credits. Need $${(totalUsdt - userCredits).toFixed(2)} more.`;
+                noteEl.style.color = '#dc3545';
+            }
+        }
+
+        // Function to apply promo code
+        async function applyPromoCode() {
+            const promoCodeInput = document.getElementById('promoCode');
+            const promoBtn = document.querySelector('.promo-btn');
+            const promoSuccess = document.getElementById('promoSuccess');
+            const promoMessage = document.getElementById('promoMessage');
+            
+            const code = promoCodeInput.value.trim().toUpperCase();
+            
+            if (!code) {
+                showError('Please enter a promo code');
+                return;
+            }
+            
+            // Show loading state
+            promoBtn.disabled = true;
+            promoBtn.textContent = 'Applying...';
+            
+            try {
+                const subtotal = calculateSubtotal();
+                
+                const response = await fetch('/api/promo/validate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        code: code,
+                        subtotal: subtotal
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to validate promo code');
+                }
+                
+                // Apply the promo code
+                appliedPromoCode = {
+                    code: result.code,
+                    discount_amount: result.discount_amount,
+                    description: result.description
+                };
+                
+                discountAmount = result.discount_amount;
+                
+                // Show success message
+                promoMessage.textContent = `${result.description} applied! You saved ${result.discount_amount.toFixed(2)}`;
+                promoSuccess.style.display = 'block';
+                
+                // Update UI
+                promoCodeInput.disabled = true;
+                promoBtn.textContent = 'Applied';
+                promoBtn.style.background = '#28a745';
+                
+                // Recalculate totals
+                updateOrderSummary(cartItems);
+                
+            } catch (error) {
+                showError(error.message || 'Failed to apply promo code');
+                // Reset promo state
+                appliedPromoCode = null;
+                discountAmount = 0;
+                promoSuccess.style.display = 'none';
+            } finally {
+                if (!appliedPromoCode) {
+                    promoBtn.disabled = false;
+                    promoBtn.textContent = 'Apply';
+                }
+            }
+        }
+
+        // Function to calculate subtotal
+        function calculateSubtotal() {
+            return cartItems.reduce((sum, item) => {
+                const price = item.duration_price || (item.subscription_services ? item.subscription_services.our_price : 0);
+                const convertedPrice = convertPrice(price);
+                return sum + (convertedPrice * item.quantity);
+            }, 0);
+        }
+
+        // Function to calculate tax based on payment method
+        function calculateTax(subtotal, afterDiscount = false) {
+            const selectedMethod = document.querySelector('.payment-method.active')?.dataset.method || 'baridimob';
+            let taxableAmount = subtotal;
+            
+            if (afterDiscount && discountAmount > 0) {
+                taxableAmount = Math.max(0, subtotal - discountAmount);
+            }
+            
+            if (selectedMethod === 'flexy') {
+                return taxableAmount * 0.2; // 20% tax for Flexy
+            } else if (selectedMethod === 'chargily') {
+                return taxableAmount * 0.025; // 2.5% fee for Chargily
+            } else {
+                return 0; // 0% tax for Baridimob
+            }
+        }
+
+        // Function to calculate total amount
+        function calculateTotal() {
+            const subtotal = calculateSubtotal();
+            const afterDiscountSubtotal = Math.max(0, subtotal - discountAmount);
+            const tax = calculateTax(subtotal, true);
+            return afterDiscountSubtotal + tax;
+        }
+
+        // Function to process checkout
+        async function processCheckout() {
+            // Show loading overlay
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            // Get selected payment method
+            const selectedMethod = document.querySelector('.payment-method.active').dataset.method;
+            
+            try {
+                // Validate form
+                if (!validateForm()) {
+                    throw new Error('Please fill all required fields correctly');
+                }
+                
+                // Get form data
+                const formData = getFormData();
+                const totalAmount = calculateTotal();
+                
+                // Handle wallet payment
+                if (selectedMethod === 'wallet') {
+                    await processWalletPayment(formData, totalAmount);
+                    return;
+                }
+                
+                // Handle Chargily payment
+                if (selectedMethod === 'chargily') {
+                    await processChargilyPayment(formData, totalAmount);
+                    return;
+                }
+                
+                // Create order via API for other payment methods
+                const response = await fetch('/api/checkout/order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                   body: JSON.stringify({
+  billingInfo: formData,
+  paymentMethod: selectedPaymentMethod,
+  cartItems: cartItems,
+  totalAmount: totalAmount,
+  promoCode: appliedPromoCode,
+  currency: currency // Send currency for conversion
+})
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to create order');
+                }
+                
+                orderId = result.orderId;
+                
+                // Show success message
+                const successMessage = document.getElementById('successMessage');
+                successMessage.textContent = `Order #${orderId} placed successfully! Please complete your payment via ${selectedMethod === 'baridimob' ? 'Baridimob and send the receipt' : 'Flexy and send the payment time'}.`;
+                successMessage.style.display = 'block';
+                
+                // Scroll to success message
+                successMessage.scrollIntoView({ behavior: 'smooth' });
+                
+                // Disable checkout button after successful order
+                document.getElementById('checkoutBtn').disabled = true;
+                
+            } catch (error) {
+                showError(error.message || 'An error occurred during checkout. Please try again.');
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
+        }
+
+        // Function to process wallet payment
+        async function processWalletPayment(formData, totalAmount) {
+            try {
+                const response = await fetch('/api/checkout/wallet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        billingInfo: formData,
+                        cartItems: cartItems,
+                        totalAmount: totalAmount,
+                        promoCode: appliedPromoCode,
+                        currency: currency
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to process wallet payment');
+                }
+
+                // Update credits display
+                userCredits = result.remainingCredits || 0;
+                updateWalletInfo();
+
+                // Show success message
+                const successMessage = document.getElementById('successMessage');
+                successMessage.textContent = `Order #${result.orderId} completed successfully! Your subscriptions are now active.`;
+                successMessage.style.display = 'block';
+                
+                // Scroll to success message
+                successMessage.scrollIntoView({ behavior: 'smooth' });
+                
+                // Disable checkout button after successful order
+                document.getElementById('checkoutBtn').disabled = true;
+                
+                // Redirect to success page after a delay
+                setTimeout(() => {
+                    window.location.href = `/payments/success.html?order_id=${result.orderId}`;
+                }, 3000);
+                
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        // Function to process Chargily payment
+        async function processChargilyPayment(formData, totalAmount) {
+            try {
+                // Convert to DZD if needed (Chargily expects DZD)
+                const amountInDzd = currency === 'da' ? totalAmount : (totalAmount * 230);
+                
+                // Create Chargily checkout
+                const chargilyResponse = await fetch('https://pay.chargily.net/api/v2/checkouts', {
+                    method: 'POST',
+                    headers: {
+                        Authorization: 'Bearer live_sk_e5WgbZzfAov0qZnqZ5oHIyZUYb7fFW0LRBks5Fop',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        amount: Math.round(amountInDzd), // Amount in DZD (not cents)
+                        currency: 'dzd',
+                        success_url: `${window.location.origin}/payments/success.html?order_id=`,
+                        failure_url: `${window.location.origin}/checkout.html?payment=failed`,
+                        metadata: {
+                            customer_email: formData.email,
+                            customer_name: `${formData.firstName} ${formData.lastName}`,
+                            order_items: JSON.stringify(cartItems),
+                            currency: currency
+                        }
+                    })
+                });
+
+                const chargilyData = await chargilyResponse.json();
+                
+                if (!chargilyResponse.ok) {
+                    throw new Error(chargilyData.message || 'Failed to create payment session');
+                }
+
+                // Create order in your system first
+                const orderResponse = await fetch('/api/checkout/order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        billingInfo: formData,
+                        paymentMethod: 'chargily',
+                        cartItems: cartItems,
+                        totalAmount: totalAmount,
+                        promoCode: appliedPromoCode,
+                        paymentSessionId: chargilyData.id,
+                        paymentUrl: chargilyData.checkout_url,
+                        currency: currency // Send currency for conversion
+                    })
+                });
+
+                const orderResult = await orderResponse.json();
+                
+                if (!orderResponse.ok) {
+                    throw new Error(orderResult.error || 'Failed to create order');
+                }
+
+                // Update success URL with order ID
+                const updatedSuccessUrl = `${window.location.origin}/payments/success.html?order_id=${orderResult.orderId}`;
+                
+                // Redirect to Chargily payment page
+                window.location.href = chargilyData.checkout_url;
+                
+            } catch (error) {
+                console.error('Chargily payment error:', error);
+                throw error;
+            }
+        }
+
+        // Validate form function
+        function validateForm() {
+            const selectedMethod = document.querySelector('.payment-method.active').dataset.method;
+            let isValid = true;
+            
+            // Check all visible required fields
+            const requiredFields = document.querySelectorAll('[required]');
+            requiredFields.forEach(field => {
+                // Only validate fields that are visible
+                if (field.offsetParent !== null) {
+                    if (!field.value.trim()) {
+                        isValid = false;
+                        field.style.borderColor = '#dc3545';
+                    } else {
+                        field.style.borderColor = '#e9ecef';
+                    }
+                }
+            });
+            
+            // Additional validation for Baridimob CCP number
+            if (selectedMethod === 'baridimob') {
+                const ccpNumber = document.getElementById('ccpNumber').value;
+                if (!ccpNumber || !/^\d+/.test(ccpNumber)) {
+                    isValid = false;
+                    document.getElementById('ccpNumber').style.borderColor = '#dc3545';
+                }
+            }
+            
+            // No additional validation needed for Chargily (handled by payment gateway)
+            
+            return isValid;
+        }
+
+        // Get form data function
+        function getFormData() {
+            return {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                country: document.getElementById('country').value,
+                paymentMethod: document.querySelector('.payment-method.active').dataset.method,
+                ccpNumber: document.getElementById('ccpNumber')?.value || ''
+            };
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            
+            errorMessage.scrollIntoView({ behavior: 'smooth' });
+            
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Load cart items from API
+        async function loadCartItems() {
+            try {
+                const response = await fetch('/api/checkout/cart', {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    throw new Error('Failed to load cart items');
+                }
+                
+                cartItems = await response.json();
+                
+                if (cartItems.length === 0) {
+                    showError('Your cart is empty. Please add items before checkout.');
+                    document.getElementById('checkoutBtn').disabled = true;
+                    return;
+                }
+                
+                updateOrderSummary(cartItems);
+                
+            } catch (error) {
+                console.error('Load cart items error:', error);
+                showError('Failed to load cart items: ' + error.message);
+            }
+        }
+
+        // Update order summary UI
+        function updateOrderSummary(items) {
+            const orderItemsContainer = document.getElementById('orderItems');
+            const subtotalElement = document.getElementById('subtotal');
+            const discountRow = document.getElementById('discountRow');
+            const discountElement = document.getElementById('discountAmount');
+            const taxElement = document.getElementById('tax');
+            const totalElement = document.getElementById('totalAmount');
+            
+            // Calculate totals
+            const subtotal = calculateSubtotal();
+            const tax = calculateTax(subtotal, true);
+            const total = calculateTotal();
+            
+            // Update cart items display
+            orderItemsContainer.innerHTML = items.map(item => {
+                const price = item.duration_price || (item.subscription_services ? item.subscription_services.our_price : 0);
+                const convertedPrice = convertPrice(price);
+                const name = item.subscription_services ? item.subscription_services.name : 'Unknown Service';
+                
+                return `
+                    <div class="order-item">
+                        <div class="item-info">
+                            <div class="item-name">${name}</div>
+                            <div class="item-details">Quantity: ${item.quantity} | Duration: ${item.duration || 1} month(s)</div>
+                        </div>
+                        <div class="item-price">${(convertedPrice * item.quantity).toFixed(2)} ${currency.toUpperCase()}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Update totals
+            subtotalElement.textContent = `${subtotal.toFixed(2)} ${currency.toUpperCase()}`;
+            
+            // Show/hide discount row
+            if (discountAmount > 0) {
+                discountRow.style.display = 'flex';
+                discountElement.textContent = `-${discountAmount.toFixed(2)} ${currency.toUpperCase()}`;
+            } else {
+                discountRow.style.display = 'none';
+            }
+            
+            taxElement.textContent = `${tax.toFixed(2)} ${currency.toUpperCase()}`;
+            totalElement.textContent = `${total.toFixed(2)} ${currency.toUpperCase()}`;
+            
+            // Update tax label based on payment method
+            const selectedMethod = document.querySelector('.payment-method.active')?.dataset.method || 'baridimob';
+            let taxLabel = 'Tax (0%):';
+            if (selectedMethod === 'flexy') {
+                taxLabel = 'Tax (20%):';
+            } else if (selectedMethod === 'chargily') {
+                taxLabel = 'Fee (2.5%):';
+            }
+            taxElement.parentElement.firstChild.textContent = taxLabel;
+        }
+
+        // Initialize page
+        async function initializePage() {
+            try {
+                // Initialize currency from localStorage
+                const savedCurrency = localStorage.getItem('click_currency') || 'usdt';
+                currency = savedCurrency;
+                updateCurrencyUI();
+                
+                // Add currency toggle event listener
+                document.getElementById('currencyToggle').addEventListener('click', toggleCurrency);
+                
+                // Load user credits
+                await loadUserCredits();
+                
+                await loadCartItems();
+            } catch (error) {
+                console.error('Initialize page error:', error);
+                showError('Failed to initialize page: ' + error.message);
+            }
+        }
+
+        // Initialize page when loaded
+        window.onload = initializePage;
+    </script>
+</body>
+</html>

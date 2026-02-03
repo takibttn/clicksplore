@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact Us | Clicksplore</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
+  <!-- Supabase v2 (single include) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root{
+      --hot:#ff00ff;--indigo:#08003d;--violet:#8c00ff;
+      --glass-1:rgba(11,8,32,.78);--glass-2:rgba(11,8,32,.64);
+      --white:#ffffff;--text:#eef0ff;--muted:rgba(255,255,255,.8);
+      --line:rgba(255,255,255,.16);--line-2:rgba(255,255,255,.22);
+      --success:#28a745; --danger:#dc3545; --warning:#ffb703;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      font-family:'Inter',system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      line-height:1.55;color:var(--text);
+      background: radial-gradient(1200px 800px at 10% 10%, rgba(255,0,255,.15), transparent 60%),
+                  radial-gradient(1000px 700px at 90% 20%, rgba(140,0,255,.15), transparent 60%),
+                  linear-gradient(135deg,var(--hot) 0%, var(--indigo) 100%);
+      background-attachment:fixed;overflow-x:hidden;
+    }
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;
+      background: conic-gradient(from 180deg at 70% -20%, rgba(255,255,255,.08), rgba(0,0,0,0) 40%),
+                  radial-gradient(800px 300px at 50% -5%, rgba(255,255,255,.08), transparent 60%);
+      mix-blend-mode:screen;opacity:.8}
+
+    /* NAV (matches Home) */
+    nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:18px 0;transition:.25s ease;
+      background:rgba(8,0,61,.18);backdrop-filter:blur(14px);border-bottom:1px solid transparent}
+    nav.scrolled{background:rgba(8,0,61,.6);border-color:var(--line)}
+    .nav-container{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 20px;gap:16px}
+    .logo{font-size:1.6rem;font-weight:900;letter-spacing:.3px;text-decoration:none;
+      background:linear-gradient(45deg,var(--hot),#9b5cff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .nav-links{list-style:none;display:flex;gap:26px}
+    .nav-links a{color:var(--text);text-decoration:none;position:relative}
+    .nav-links a:after{content:"";position:absolute;left:0;bottom:-6px;height:2px;width:0;background:linear-gradient(90deg,var(--hot),#9b5cff);transition:width .25s}
+    .nav-links a:hover:after{width:100%}
+
+    /* CONTACT SECTION */
+    .contact-section{padding:140px 20px 90px;max-width:1200px;margin:0 auto}
+    .contact-header{text-align:center;margin-bottom:42px}
+    .contact-header h1{font-size:2.6rem;font-weight:900;color:#fff;margin-bottom:10px}
+    .contact-header p{color:var(--muted);font-size:1.08rem;max-width:760px;margin:0 auto}
+
+    .contact-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:26px;margin-top:8px}
+
+    .card{background:var(--glass-1);border:1px solid var(--line);border-radius:18px;padding:28px;
+      box-shadow:0 24px 60px rgba(0,0,0,.35);backdrop-filter:blur(8px)}
+
+    /* Info column */
+    .contact-info h2{font-size:1.6rem;color:#ffd26f;margin-bottom:18px}
+    .contact-method{display:flex;align-items:flex-start;gap:14px;margin:16px 0}
+    .contact-icon{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;color:#fff;
+      background:linear-gradient(135deg,#7a5cff,#b05cff);box-shadow:0 10px 28px rgba(122,92,255,.35);font-size:1.15rem;flex-shrink:0}
+    .contact-details h3{color:#fff;margin-bottom:4px;font-size:1.08rem}
+    .contact-details p,.contact-details a{color:var(--muted);text-decoration:none}
+    .contact-details a:hover{color:#fff}
+
+    /* Form column */
+    .contact-form h2{font-size:1.6rem;color:#ffd26f;margin-bottom:18px}
+    .form-group{margin-bottom:16px}
+    label{display:block;margin-bottom:8px;color:#fff;font-weight:600}
+    .form-control{
+      width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);
+      background:rgba(255,255,255,.06);color:#fff;outline:none;transition:.2s
+    }
+    .form-control::placeholder{color:rgba(255,255,255,.6)}
+    .form-control:focus{border-color:var(--line-2);background:rgba(255,255,255,.12);box-shadow:0 0 0 3px rgba(255,255,255,.12)}
+    textarea.form-control{min-height:150px;resize:vertical}
+
+    .submit-btn{
+      background:linear-gradient(135deg,#7a5cff,#b05cff);color:#fff;border:none;
+      padding:14px 18px;border-radius:12px;font-weight:800;cursor:pointer;box-shadow:0 14px 34px rgba(122,92,255,.35);
+      transition:transform .2s
+    }
+    .submit-btn:hover{transform:translateY(-2px)}
+
+    /* Status / Toast */
+    .status-message{margin-top:14px;padding:12px 14px;border-radius:12px;display:none;font-weight:700}
+    .status-message.show{display:block}
+    .status-ok{background:rgba(40,167,69,.15);border:1px solid rgba(40,167,69,.35);color:#c9ffd6}
+    .status-err{background:rgba(220,53,69,.15);border:1px solid rgba(220,53,69,.35);color:#ffd6db}
+
+    /* Footer (matches Home) */
+    footer{background:#0b0820;color:#dfe2ff;text-align:center;padding:54px 20px 24px}
+    footer .footer-links{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
+    footer .footer-links a{color:#dfe2ff;text-decoration:none}
+    footer .footer-links a:hover{color:#fff}
+
+    /* Responsive */
+    @media (max-width:768px){
+      .nav-links{display:none}
+      .contact-header h1{font-size:2rem}
+      .contact-section{padding-top:120px}
+    }
+  </style>
+</head>
+<body>
+  <!-- NAV -->
+  <nav id="navbar">
+    <div class="nav-container">
+      <a href="test3.html" class="logo">Clicksplore</a>
+      <ul class="nav-links">
+        <li><a href="test3.html">Home</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="faq.html">FAQs</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- CONTACT -->
+  <section class="contact-section">
+    <div class="contact-header">
+      <h1>Contact Our Support Team</h1>
+      <p>Have questions or need assistance? Our team is available 24/7 to help you with any issues or inquiries about our services.</p>
+    </div>
+
+    <div class="contact-container">
+      <!-- Info -->
+      <div class="card contact-info">
+        <h2>Get In Touch</h2>
+
+        <div class="contact-method">
+          <div class="contact-icon"><i class="fa-solid fa-envelope"></i></div>
+          <div class="contact-details">
+            <h3>Email Us</h3>
+            <a href="mailto:support@clicksplore.com">support@clicksplore.com</a>
+            <p>Typically responds within 1 hour</p>
+          </div>
+        </div>
+
+        <div class="contact-method">
+          <div class="contact-icon"><i class="fa-solid fa-comment-dots"></i></div>
+          <div class="contact-details">
+            <h3>Live Chat</h3>
+            <p>Click the chat icon in the bottom-right corner</p>
+            <p>Available 24/7</p>
+          </div>
+        </div>
+
+        <div class="contact-method">
+          <div class="contact-icon"><i class="fa-solid fa-phone"></i></div>
+          <div class="contact-details">
+            <h3>Call Us</h3>
+            <a href="tel:+213697799311">+213 697799311</a>
+            <p>Sat–Fri: 8AM–12AM</p>
+          </div>
+        </div>
+
+        <div class="contact-method">
+          <div class="contact-icon"><i class="fa-solid fa-map-marker-alt"></i></div>
+          <div class="contact-details">
+            <h3>Headquarters</h3>
+            <p>Algeria, Annaba<br/>Sidi Achour</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div class="card contact-form">
+        <h2>Send Us a Message</h2>
+        <form id="contactForm" novalidate>
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" class="form-control" placeholder="e.g. Sarah Benali" required>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" class="form-control" placeholder="you@example.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="subject">Subject</label>
+            <select id="subject" class="form-control" required>
+              <option value="">Select a topic</option>
+              <option value="account">Account Help</option>
+              <option value="billing">Billing Question</option>
+              <option value="technical">Technical Support</option>
+              <option value="other">Other Inquiry</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="message">Your Message</label>
+            <textarea id="message" class="form-control" placeholder="Tell us a bit more…" required></textarea>
+          </div>
+
+          <button type="submit" class="submit-btn"><i class="fa-solid fa-paper-plane"></i> Send Message</button>
+          <div id="statusMessage" class="status-message"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-links">
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+      <a href="refund.html">Refund Policy</a>
+      <a href="about.html">About Us</a>
+    </div>
+    <p>© 2025 Clicksplore. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Navbar scroll effect (same as Home)
+    window.addEventListener('scroll', () => {
+      const navbar = document.getElementById('navbar');
+      if (!navbar) return;
+      if (window.scrollY > 96) navbar.classList.add('scrolled');
+      else navbar.classList.remove('scrolled');
+    });
+
+    // ---- Supabase wiring (single client) ----
+    document.addEventListener('DOMContentLoaded', () => {
+      const supabaseUrl = 'https://hsomlteyiyjtusfqxfvh.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhzb21sdGV5aXlqdHVzZnF4ZnZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwMTUzMDgsImV4cCI6MjA3MDU5MTMwOH0.VEjhuylzTwja0crf7Cve9795J3L7QRvQ-8Zic04BtvY';
+
+      if (typeof supabase === 'undefined') {
+        console.error('Supabase JS not loaded');
+        showStatus('Failed to load Supabase. Please refresh.', true);
+        return;
+      }
+
+      const client = supabase.createClient(supabaseUrl, supabaseKey);
+      const form = document.getElementById('contactForm');
+      const statusBox = document.getElementById('statusMessage');
+
+      function showStatus(msg, isError=false){
+        statusBox.textContent = msg;
+        statusBox.className = `status-message show ${isError ? 'status-err':'status-ok'}`;
+        setTimeout(()=>{ statusBox.className='status-message'; statusBox.textContent=''; }, 5000);
+      }
+
+      async function testConnection(){
+        try{
+          const { error } = await client.from('contact_submissions').select('id').limit(1);
+          if (error) throw error;
+          return true;
+        }catch(e){
+          console.error('Connection test failed:', e);
+          return false;
+        }
+      }
+
+      form.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+
+        // Simple client-side validation
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const subject = document.getElementById('subject').value.trim();
+        const message = document.getElementById('message').value.trim();
+
+        if (!name || !email || !subject || !message) {
+          showStatus('Please fill in all fields.', true);
+          return;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          showStatus('Please enter a valid email address.', true);
+          return;
+        }
+
+        // Check connection
+        const ok = await testConnection();
+        if (!ok) {
+          showStatus('Connection issue. Please refresh and try again.', true);
+          return;
+        }
+
+        try{
+          const { error } = await client.from('contact_submissions').insert([{
+            name, email, subject, message
+          }]);
+          if (error) throw error;
+
+          showStatus('Thank you! Your message has been sent.');
+          form.reset();
+        }catch(err){
+          console.error('Submission error:', err);
+          showStatus(`Error: ${err.message}`, true);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
