@@ -5,6 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - Clicksplore</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const __cfg = window.__APP_CONFIG__ || {};
+        const API_BASE_CONFIG = __cfg.API_BASE;
+        const CLIENT_API_BASE_CONFIG = window.location.origin;
+        const SUPABASE_URL = __cfg.SUPABASE_URL;
+        const SUPABASE_ANON_KEY = __cfg.SUPABASE_ANON_KEY;
+
+        if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !API_BASE_CONFIG) {
+            throw new Error('Missing runtime config. Ensure /config.js is available and env vars are set.');
+        }
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        window.supabase = supabaseClient;
+
+        function apiUrl(path) {
+            if (!path) return API_BASE_CONFIG;
+            if (path.startsWith('http://') || path.startsWith('https://')) return path;
+            if (!path.startsWith('/')) path = '/' + path;
+            return API_BASE_CONFIG + path;
+        }
+
+        function clientApiUrl(path) {
+            if (!path) return CLIENT_API_BASE_CONFIG;
+            if (path.startsWith('http://') || path.startsWith('https://')) return path;
+            if (!path.startsWith('/')) path = '/' + path;
+            return CLIENT_API_BASE_CONFIG + path;
+        }
+    </script>
     <style>
         /* Your existing CSS remains unchanged */
         * {
@@ -839,7 +869,7 @@
                             <p>Flexy allows you to pay in installments with a 20% service fee. Complete your purchase and then send us the time of the payment process.</p>
                             
                             <!-- Flexy Image Placeholder - Replace with actual image URL -->
-                            <img src="c:\Users\Admin\Downloads\5933999856823685143.jpg" alt="Flexy Payment Guide" class="flexy-image">
+                            <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='900'%20height='450'%3E%3Crect%20width='100%25'%20height='100%25'%20fill='%23f3f4f6'/%3E%3Ctext%20x='50%25'%20y='50%25'%20dominant-baseline='middle'%20text-anchor='middle'%20fill='%236b7280'%20font-family='Arial'%20font-size='32'%3EFlexy%20Payment%20Guide%3C/text%3E%3C/svg%3E" alt="Flexy Payment Guide" class="flexy-image">
                             
                             <p><strong>Important:</strong> After completing your order, please send us the exact time when you initiated the Flexy payment process via WhatsApp or Telegram.</p>
                             
@@ -1056,7 +1086,7 @@
         // Load user credits
         async function loadUserCredits() {
             try {
-                const response = await fetch('/api/profile', {
+                const response = await fetch(apiUrl('/api/profile'), {
                     credentials: 'include'
                 });
                 
@@ -1231,7 +1261,7 @@
                 }
                 
                 // Create order via API for other payment methods
-                const response = await fetch('/api/checkout/order', {
+                const response = await fetch(apiUrl('/api/checkout/order'), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1276,7 +1306,7 @@
         // Function to process wallet payment
         async function processWalletPayment(formData, totalAmount) {
             try {
-                const response = await fetch('/api/checkout/wallet', {
+                const response = await fetch(apiUrl('/api/checkout/wallet'), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1325,18 +1355,23 @@
         // Function to process Chargily payment
         async function processChargilyPayment(formData, totalAmount) {
             try {
+                // Deduct Chargily 2.5% fee from amount sent (fee already visible in UI)
+                const subtotalForFee = calculateSubtotal();
+                const chargilyFee = calculateTax(subtotalForFee, true); // returns 2.5% of subtotal when Chargily selected
+                const netTotal = Math.max(0, totalAmount - chargilyFee);
+
                 // Convert to DZD if needed (Chargily expects DZD)
-                const amountInDzd = currency === 'da' ? totalAmount : (totalAmount * 230);
+                const amountInDzd = currency === 'da' ? netTotal : (netTotal * 230);
                 
-                // Create Chargily checkout
-                const chargilyResponse = await fetch('https://pay.chargily.net/api/v2/checkouts', {
+                // Create Chargily checkout via server (keeps secret key off the client)
+                const chargilyResponse = await fetch(clientApiUrl('/api/chargily/create-checkout'), {
                     method: 'POST',
                     headers: {
-                        Authorization: 'Bearer live_sk_e5WgbZzfAov0qZnqZ5oHIyZUYb7fFW0LRBks5Fop',
                         'Content-Type': 'application/json',
                     },
+                    credentials: 'include',
                     body: JSON.stringify({
-                        amount: Math.round(amountInDzd), // Amount in DZD (not cents)
+                        amount: Math.round(amountInDzd),
                         currency: 'dzd',
                         success_url: `${window.location.origin}/payments/success.html?order_id=`,
                         failure_url: `${window.location.origin}/checkout.html?payment=failed`,
@@ -1349,14 +1384,24 @@
                     })
                 });
 
-                const chargilyData = await chargilyResponse.json();
-                
+                let chargilyData = null;
+                const contentType = (chargilyResponse.headers.get('content-type') || '').toLowerCase();
+                if (contentType.includes('application/json')) {
+                    chargilyData = await chargilyResponse.json();
+                } else {
+                    const text = await chargilyResponse.text();
+                    if (!chargilyResponse.ok) {
+                        throw new Error(`Failed to create payment session (HTTP ${chargilyResponse.status}). Deploy/update your server then try again.`);
+                    }
+                    throw new Error('Unexpected response from server while creating Chargily checkout.');
+                }
+
                 if (!chargilyResponse.ok) {
-                    throw new Error(chargilyData.message || 'Failed to create payment session');
+                    throw new Error(chargilyData?.error || chargilyData?.message || 'Failed to create payment session');
                 }
 
                 // Create order in your system first
-                const orderResponse = await fetch('/api/checkout/order', {
+                const orderResponse = await fetch(apiUrl('/api/checkout/order'), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1456,7 +1501,7 @@
         // Load cart items from API
         async function loadCartItems() {
             try {
-                const response = await fetch('/api/checkout/cart', {
+                const response = await fetch(apiUrl('/api/checkout/cart'), {
                     credentials: 'include'
                 });
                 

@@ -1,17 +1,23 @@
 <!DOCTYPE html>
-<html lang="en"  dir="rtl" lang="ar">
+<html lang="en">
   
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Clicksplore – Premium Shared Subscriptions</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <script src="/config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // Load environment variables - MUST BE FIRST
-    const SUPABASE_URL = process.env.SUPABASE_URL || 'https://hsomlteyiyjtusfqxfvh.supabase.co';
-    const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhzb21sdGV5aXlqdHVzZnF4ZnZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwMTUzMDgsImV4cCI6MjA3MDU5MTMwOH0.example_key_here';
-    const API_BASE_CONFIG = process.env.API_BASE || 'https://clickserver.vercel.app';
+    const __cfg = window.__APP_CONFIG__ || {};
+    const SUPABASE_URL = __cfg.SUPABASE_URL;
+    const SUPABASE_ANON_KEY = __cfg.SUPABASE_ANON_KEY;
+    const API_BASE_CONFIG = __cfg.API_BASE;
+
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !API_BASE_CONFIG) {
+      throw new Error('Missing runtime config. Ensure /config.js is available and env vars are set.');
+    }
 
     // Initialize Supabase client
     const { createClient } = supabase;
@@ -19,8 +25,143 @@
     
     // Make it globally available
     window.supabase = supabaseClient;
+    
+    // Translations object - DEFINE BEFORE language.js
+    const translations = {
+      en: {
+        no_services: 'No Services Available',
+        try_another_category: 'Try another category',
+        failed_load_products: 'Failed to load products',
+        search_prompt: 'Please enter a search term',
+        search_results: 'Search Results',
+        search_found: 'Found {count} result(s)',
+        search_clear: 'Clear',
+        search_results_count: 'Found {count} result(s) for "{query}"',
+        no_results: 'No results found for "{query}"',
+        regular_price: 'Regular Price',
+        save: 'Save',
+        shared_account: 'Shared Account',
+        private_account: 'Private Account',
+        max_users: 'Max {count} users',
+        please_login: 'Please login to add items',
+        add_to_cart: 'Add to Cart',
+        cancel: 'Cancel',
+        total: 'Total',
+        '1_month': '1 Month',
+        'x_months': '{count} Months',
+        duration_only_1_month: '{count} service(s) only support 1-month duration',
+        duration_notice: 'Tap "Add to Cart" to select duration',
+        no_services_duration: 'No services available for this duration',
+        categories: 'Categories',
+        home: 'Home',
+        services: 'Services',
+        how_it_works: 'How it Works',
+        reviews: 'Reviews',
+        contact: 'Contact',
+        hero_title: 'Get <span class="highlight">Premium Subscriptions</span><br/>at Fraction Cost',
+        hero_subtitle: 'Access Netflix, Spotify, Disney+, and more through secure shared accounts. Save up to 75% with full premium features.',
+        hero_cta: 'Get Netflix for $3.99/mo',
+        services_title: 'Premium Services Available',
+        hiw_title: 'How Clicksplore Works',
+        step1_title: 'Choose Your Service',
+        step1_desc: 'Pick streaming, music, software, or VPN – we\'ve got you covered.',
+        step2_title: 'Secure Checkout',
+        step2_desc: 'Pay safely. Your payment is encrypted and protected.',
+        step3_title: 'Instant Access',
+        step3_desc: 'Start enjoying your premium plan within minutes.',
+        testimonials_title: 'What Our Users Say',
+        testimonial_text: '"Clicksplore saved me over $200 this year! The setup was instant and everything works perfectly."',
+        testimonial_author: '– Sarah M., Premium User',
+        badges_title: 'Why Trust Clicksplore?',
+        privacy: 'Privacy Policy',
+        terms: 'Terms of Service',
+        support: 'Support',
+        about: 'About Us',
+        faq: 'FAQ',
+        copyright: '© 2025 Clicksplore. All rights reserved. | Secure, Affordable, Trusted.',
+        search_placeholder: 'Search for services, software, subscriptions…',
+        search_button: 'Search',
+        email_placeholder: 'Email address',
+        name_placeholder: 'Full name',
+        password_placeholder: 'Password',
+        signup_title: 'Create Account',
+        login_title: 'Login to Clicksplore',
+        signup_button: 'Create Account',
+        login_button: 'Continue',
+        has_account: 'Already have an account?',
+        no_account: 'Don\'t have an account?',
+        login_link: 'Log in',
+        create_one: 'Create one',
+        language_changed: 'Language changed to {lang}'
+      },
+      ar: {
+        no_services: 'لا توجد خدمات',
+        try_another_category: 'جرب فئة أخرى',
+        failed_load_products: 'فشل تحميل المنتجات',
+        search_prompt: 'يرجى إدخال مصطلح البحث',
+        search_results: 'نتائج البحث',
+        search_found: 'وجدت {count} نتيجة',
+        search_clear: 'مسح',
+        search_results_count: 'وجدت {count} نتيجة لـ "{query}"',
+        no_results: 'لم يتم العثور على نتائج لـ "{query}"',
+        regular_price: 'السعر العادي',
+        save: 'وفر',
+        shared_account: 'حساب مشترك',
+        private_account: 'حساب خاص',
+        max_users: 'الحد الأقصى {count} مستخدمين',
+        please_login: 'يرجى تسجيل الدخول',
+        add_to_cart: 'أضف إلى السلة',
+        cancel: 'إلغاء',
+        total: 'الإجمالي',
+        '1_month': 'شهر واحد',
+        'x_months': '{count} أشهر',
+        duration_only_1_month: '{count} خدمة تدعم الشهر الواحد فقط',
+        duration_notice: 'اضغط على "أضف إلى السلة" لاختيار المدة',
+        no_services_duration: 'لا توجد خدمات لهذه المدة',
+        categories: 'الفئات',
+        home: 'الرئيسية',
+        services: 'الخدمات',
+        how_it_works: 'كيف يعمل',
+        reviews: 'التقييمات',
+        contact: 'اتصل بنا',
+        hero_title: 'احصل على <span class="highlight">الاشتراكات المميزة</span><br/>بسعر منخفض',
+        hero_subtitle: 'احصل على Netflix و Spotify و Disney+ والمزيد من خلال الحسابات المشتركة الآمنة. وفر حتى 75٪.',
+        hero_cta: 'احصل على Netflix مقابل $3.99/شهر',
+        services_title: 'الخدمات المتاحة',
+        hiw_title: 'كيفية عمل Clicksplore',
+        step1_title: 'اختر خدمتك',
+        step1_desc: 'اختر البث أو الموسيقى أو البرامج أو VPN - لدينا كل شيء.',
+        step2_title: 'الدفع الآمن',
+        step2_desc: 'ادفع بأمان. دفعتك مشفرة ومحمية.',
+        step3_title: 'الوصول الفوري',
+        step3_desc: 'ابدأ بالاستمتاع بخطتك المميزة في غضون دقائق.',
+        testimonials_title: 'ما يقوله مستخدمونا',
+        testimonial_text: '"وفرت Clicksplore لي أكثر من $200 هذا العام! كان الإعداد فوريًا وكل شيء يعمل بشكل مثالي."',
+        testimonial_author: '– سارة م.، مستخدم مميز',
+        badges_title: 'لماذا تثق بـ Clicksplore؟',
+        privacy: 'سياسة الخصوصية',
+        terms: 'شروط الخدمة',
+        support: 'الدعم',
+        about: 'عن الموقع',
+        faq: 'الأسئلة الشائعة',
+        copyright: '© 2025 Clicksplore. جميع الحقوق محفوظة. | آمن وبأسعار معقولة وموثوق به.',
+        search_placeholder: 'ابحث عن الخدمات والبرامج والاشتراكات…',
+        search_button: 'ابحث',
+        email_placeholder: 'عنوان البريد الإلكتروني',
+        name_placeholder: 'الاسم الكامل',
+        password_placeholder: 'كلمة المرور',
+        signup_title: 'إنشاء حساب',
+        login_title: 'تسجيل الدخول إلى Clicksplore',
+        signup_button: 'إنشاء حساب',
+        login_button: 'متابعة',
+        has_account: 'هل لديك حساب بالفعل؟',
+        no_account: 'ليس لديك حساب؟',
+        login_link: 'تسجيل الدخول',
+        create_one: 'إنشاء واحد',
+        language_changed: 'تم تغيير اللغة إلى {lang}'
+      }
+    };
   </script>
-  <script src="language.js"></script>
   <style>
     :root{
       --hot:#ff00ff;--indigo:#08003d;--violet:#8c00ff;
@@ -371,8 +512,8 @@ const state = {
 
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
-// Use environment variable or fallback to relative path
-const API_BASE = (window.location.protocol === 'file:') ? 'http://localhost:3000' : API_BASE_CONFIG;
+// FIX: Always use full API_BASE for non-file protocol
+const API_BASE = API_BASE_CONFIG;
 
 document.addEventListener('DOMContentLoaded', init);
 
@@ -398,7 +539,7 @@ async function init() {
     const cookieUser = getUserFromCookie();
     const base = API_BASE;
     
-    // Then try server session
+    // Then try server session - SUPPRESS 401 errors
     let serverSessionValid = false;
     try {
       const res = await fetch(`${base}/api/profile`, { 
@@ -412,6 +553,11 @@ async function init() {
         state.user = { ...user, ...profile };
         serverSessionValid = true;
         console.log('Session restored from server');
+      } else if (res.status === 401) {
+        // 401 is expected when user is not logged in - don't log as error
+        console.log('No active server session (user not logged in)');
+      } else {
+        console.warn('Server session check failed:', res.status);
       }
     } catch (fetchError) {
       console.warn('Server session check failed:', fetchError.message);
@@ -599,6 +745,18 @@ async function attemptSessionRefresh() {
       setUserCookie(state.user);
       console.log('Session refreshed successfully via server');
       return true;
+    } else if (refreshRes.status === 401) {
+      console.log('No refresh token available - user needs to login');
+      // Fix: If UI says logged in but Server says NO, force logout
+      if (state.user) {
+        console.warn('Session sync mismatch. Clearing stale client session.');
+        await softLogout();
+        toast('Session expired. Please login again.');
+      }
+      return false;
+    } else {
+      console.warn('Session refresh failed:', refreshRes.status);
+      return false;
     }
   } catch (e) {
     console.warn('Session refresh failed:', e.message);
@@ -679,60 +837,28 @@ function getProductImage(product) {
 
 /* ============= Products ============= */
 
-// Load subscriptions from server
+// Load subscriptions from server - FIX API_BASE
 async function loadSubscriptions() {
   try {
-    // For server-based
-    if (window.location.protocol !== 'file:') {
-      const response = await fetch('/api/subscriptions', {
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-      if (response.ok) {
-        state.subscriptions = await response.json();
-        console.log('Loaded subscriptions:', state.subscriptions.map(s => ({
-          id: s.id, 
-          name: s.name, 
-          has_duration_pricing: !!s.duration_pricing && s.duration_pricing.length > 0
-        })));
-      } else {
-        throw new Error(`HTTP ${response.status}: Failed to load subscriptions`);
+    const response = await fetch(`${API_BASE}/api/subscriptions`, {
+      headers: {
+        'Accept': 'application/json'
       }
-    } 
-    // For client-side only (fallback)
-    else {
-      const { data, error } = await window.supabase
-        .from('subscription_services')
-        .select('*')
-        .eq('is_active', true);
-        
-      if (error) throw error;
-      state.subscriptions = data || [];
-      
-      // Load duration pricing for each service
-      for (let service of state.subscriptions) {
-        const { data: pricing, error: priceError } = await window.supabase
-          .from('subscription_duration_prices')
-          .select('*')
-          .eq('service_id', service.id)
-          .eq('is_active', true);
-          
-        if (!priceError && pricing && pricing.length > 0) {
-          service.duration_pricing = pricing;
-        } else {
-          // No duration pricing - service only supports 1-month
-          service.duration_pricing = [];
-        }
-      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: Failed to load subscriptions`);
     }
+    
+    state.subscriptions = await response.json();
+    console.log('Loaded subscriptions:', state.subscriptions.length);
     
     // Extract categories
     const cats = Array.from(new Set(state.subscriptions.map(s => (s.category || '').trim()).filter(Boolean)));
     state.subCategories = cats;
   } catch (error) {
     console.error('Load subscriptions error:', error);
-    toast(translate('failed_load_products'));
+    toast('Failed to load products');
     state.subscriptions = [];
     state.subCategories = [];
   }
@@ -1144,52 +1270,39 @@ function buildDurationOptions(product) {
     .sort((a, b) => a.duration - b.duration);
 }
 
-// Load user cart from server - FIXED
+// Load user cart from server - IMPROVED error handling
 async function loadUserCart() {
-  if (!state.user) return;
+  if (!state.user) {
+    console.log('User not logged in, skipping cart load');
+    return;
+  }
   
   try {
-    // For server-based auth
-    if (window.location.protocol !== 'file:') {
-      const base = API_BASE;  // Use relative path
-      const response = await fetch(`${base}/api/cart`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        state.cart = await response.json();
-      } else if (response.status === 401) {
-        console.log('Unauthorized access to cart, user may need to re-login');
-        // Don't throw error, just keep empty cart
-        state.cart = [];
-      } else {
-        throw new Error(`HTTP ${response.status}: Failed to load cart`);
+    const response = await fetch(`${API_BASE}/api/cart`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json'
       }
-    } 
-    // For client-side only (fallback)
-    else {
-      const { data, error } = await window.supabase
-        .from('cart_items')
-        .select('*')
-        .eq('user_id', state.user.id);
-        
-      if (!error) {
-        state.cart = data || [];
-      } else {
-        console.error('Load cart error:', error);
-      }
-    }
+    });
     
-    persist('click_cart', state.cart);
-    paintCartCount();
+    if (response.ok) {
+      state.cart = await response.json();
+      console.log('Cart loaded:', state.cart.length, 'items');
+    } else if (response.status === 401) {
+      console.log('Unauthorized access to cart - user not logged in');
+      state.cart = [];
+    } else {
+      console.warn(`Failed to load cart: HTTP ${response.status}`);
+      state.cart = [];
+    }
   } catch (error) {
-    console.error('Load cart error:', error);
-    // Don't show error to user for cart loading failure
+    console.warn('Load cart error:', error.message);
+    state.cart = [];
   }
+  
+  persist('click_cart', state.cart);
+  paintCartCount();
 }
 
 // Paint cart count badge
@@ -1259,8 +1372,7 @@ $('#cartBtn')?.addEventListener('click', async () => {
         const item = state.cart.find(x => String(x.id) === String(btn.dataset.remove));
         if (!item) return;
         try {
-          const base = API_BASE;
-          const res = await fetch(`${base}/api/cart/${encodeURIComponent(item.id)}`, {
+          const res = await fetch(`${API_BASE}/api/cart/${encodeURIComponent(item.id)}`, {
             method: 'DELETE', 
             credentials: 'include',
             headers: {
@@ -1289,8 +1401,7 @@ $('#cartBtn')?.addEventListener('click', async () => {
         if (!item) return;
         const newQty = Math.min(10, (item.quantity || 1) + 1);
         try {
-          const base = API_BASE;
-          const res = await fetch(`${base}/api/cart/${encodeURIComponent(item.id)}`, {
+          const res = await fetch(`${API_BASE}/api/cart/${encodeURIComponent(item.id)}`, {
             method: 'PUT', 
             credentials: 'include', 
             headers: {
@@ -1317,8 +1428,7 @@ $('#cartBtn')?.addEventListener('click', async () => {
         if (!item) return;
         const newQty = Math.max(1, (item.quantity || 1) - 1);
         try {
-          const base = API_BASE;
-          const res = await fetch(`${base}/api/cart/${encodeURIComponent(item.id)}`, {
+          const res = await fetch(`${API_BASE}/api/cart/${encodeURIComponent(item.id)}`, {
             method: 'PUT', 
             credentials: 'include', 
             headers: {
@@ -1848,134 +1958,141 @@ window.addToCart = addToCart;
 </script>
 
 <script>
-// Language Manager - This should be included on every page
-const LanguageManager = {
-  // Initialize language on page load
-  init: function() {
-    // Try to get language from various sources in order of priority
-    let lang = null;
-    
-    // 1. Check URL parameter (highest priority)
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('lang')) {
-      lang = urlParams.get('lang');
-    }
-    
-    // 2. Check localStorage
-    if (!lang) {
-      lang = localStorage.getItem('click_lang');
-    }
-    
-    // 3. Check browser language
-    if (!lang) {
-      const browserLang = navigator.language || navigator.userLanguage;
-      if (browserLang.startsWith('ar')) {
-        lang = 'ar';
+// Language Manager - Check if already defined
+if (typeof LanguageManager === 'undefined') {
+  const LanguageManager = {
+    init: function() {
+      let lang = null;
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('lang')) {
+        lang = urlParams.get('lang');
+      }
+      
+      if (!lang) {
+        lang = localStorage.getItem('click_lang');
+      }
+      
+      if (!lang) {
+        const browserLang = navigator.language || navigator.userLanguage;
+        if (browserLang.startsWith('ar')) {
+          lang = 'ar';
+        } else {
+          lang = 'en';
+        }
+      }
+      
+      if (translations[lang]) {
+        this.setLanguage(lang, false);
       } else {
-        lang = 'en'; // default
+        this.setLanguage('en', false);
       }
-    }
+    },
     
-    // Apply the language
-    if (translations[lang]) {
-      this.setLanguage(lang, false); // false = don't show toast
-    } else {
-      this.setLanguage('en', false); // fallback to English
-    }
-  },
-  
-  // Set language and persist it
-  setLanguage: function(langCode, showToast = true) {
-    if (!translations[langCode]) return false;
-    
-    // Update state if it exists
-    if (typeof state !== 'undefined') {
-      state.lang = langCode;
-    }
-    
-    // Store in localStorage for persistence across pages
-    localStorage.setItem('click_lang', langCode);
-    
-    // Update UI direction for RTL languages
-    if (langCode === 'ar') {
-      document.documentElement.dir = 'rtl';
-      document.documentElement.lang = 'ar';
-      document.body.classList.add('rtl');
-      document.body.classList.remove('ltr');
-    } else {
-      document.documentElement.dir = 'ltr';
-      document.documentElement.lang = 'en';
-      document.body.classList.add('ltr');
-      document.body.classList.remove('rtl');
-    }
-    
-    // Update all translatable elements if the function exists
-    if (typeof updateUIText !== 'undefined') {
-      updateUIText();
-    }
-    
-    // Update current language indicator
-    const currentLangEl = document.getElementById('currentLang');
-    if (currentLangEl) {
-      currentLangEl.textContent = langCode.toUpperCase();
-    }
-    
-    // Close language menu
-    const langMenu = document.getElementById('langMenu');
-    if (langMenu) {
-      langMenu.classList.remove('show');
-    }
-    
-    // Show notification if requested
-    if (showToast) {
-      const langName = langCode === 'en' ? 'English' : 'العربية';
-      if (typeof toast !== 'undefined') {
-        toast(translate('language_changed', {lang: langName}));
+    setLanguage: function(langCode, showToast = true) {
+      if (!translations[langCode]) return false;
+      
+      if (typeof state !== 'undefined') {
+        state.lang = langCode;
       }
-    }
-    
-    // Dispatch event so other components can react to language change
-    window.dispatchEvent(new CustomEvent('languageChanged', {
-      detail: { language: langCode }
-    }));
-    
-    return true;
-  },
-  
-  // Function to translate text with placeholders
-  translate: function(key, params = {}) {
-    const lang = localStorage.getItem('click_lang') || 'en';
-    let text = translations[lang][key] || translations['en'][key] || key;
-    
-    // Replace placeholders
-    Object.keys(params).forEach(param => {
-      text = text.replace(`{${param}}`, params[param]);
-    });
-    
-    return text;
-  },
-  
-  // Update navigation links to preserve language
-  updateNavigationLinks: function() {
-    const lang = localStorage.getItem('click_lang') || 'en';
-    if (lang === 'en') return; // Default language doesn't need parameter
-    
-    document.querySelectorAll('a:not([href^="#"]):not([href^="javascript:"]):not([href*="lang="])').forEach(link => {
-      const href = link.getAttribute('href');
-      if (href && !href.includes('lang=')) {
-        const separator = href.includes('?') ? '&' : '?';
-        link.setAttribute('href', `${href}${separator}lang=${lang}`);
+      
+      localStorage.setItem('click_lang', langCode);
+      
+      if (langCode === 'ar') {
+        document.documentElement.dir = 'rtl';
+        document.documentElement.lang = 'ar';
+        document.body.classList.add('rtl');
+        document.body.classList.remove('ltr');
+      } else {
+        document.documentElement.dir = 'ltr';
+        document.documentElement.lang = 'en';
+        document.body.classList.add('ltr');
+        document.body.classList.remove('rtl');
       }
-    });
-  }
-};
+      
+      if (typeof updateUIText !== 'undefined') {
+        updateUIText();
+      }
+      
+      const currentLangEl = document.getElementById('currentLang');
+      if (currentLangEl) {
+        currentLangEl.textContent = langCode.toUpperCase();
+      }
+      
+      const langMenu = document.getElementById('langMenu');
+      if (langMenu) {
+        langMenu.classList.remove('show');
+      }
+      
+      if (showToast) {
+        const langName = langCode === 'en' ? 'English' : 'العربية';
+        if (typeof toast !== 'undefined') {
+          toast(translate('language_changed', {lang: langName}));
+        }
+      }
+      
+      window.dispatchEvent(new CustomEvent('languageChanged', {
+        detail: { language: langCode }
+      }));
+      
+      return true;
+    },
+    
+    translate: function(key, params = {}) {
+      const lang = localStorage.getItem('click_lang') || 'en';
+      let text = translations[lang][key] || translations['en'][key] || key;
+      
+      Object.keys(params).forEach(param => {
+        text = text.replace(`{${param}}`, params[param]);
+      });
+      
+      return text;
+    },
+    
+    updateNavigationLinks: function() {
+      const lang = localStorage.getItem('click_lang') || 'en';
+      if (lang === 'en') return;
+      
+      document.querySelectorAll('a:not([href^="#"]):not([href^="javascript:"]):not([href*="lang="])').forEach(link => {
+        const href = link.getAttribute('href');
+        if (href && !href.includes('lang=')) {
+          const separator = href.includes('?') ? '&' : '?';
+          link.setAttribute('href', `${href}${separator}lang=${lang}`);
+        }
+      });
+    }
+  };
+
+  window.LanguageManager = LanguageManager;
+  window.changeLanguage = function(langCode) {
+    return LanguageManager.setLanguage(langCode, true);
+  };
+  window.translate = function(key, params = {}) {
+    return LanguageManager.translate(key, params);
+  };
+
+  document.addEventListener('DOMContentLoaded', function() {
+    LanguageManager.init();
+    setTimeout(() => {
+      LanguageManager.updateNavigationLinks();
+    }, 100);
+  });
+
+  window.addEventListener('languageChanged', function(e) {
+    setTimeout(() => {
+      LanguageManager.updateNavigationLinks();
+    }, 100);
+  });
+}
 
 // Make LanguageManager available globally
 window.LanguageManager = LanguageManager;
 window.changeLanguage = function(langCode) {
   return LanguageManager.setLanguage(langCode, true);
 };
-window.translate = LanguageManager.translate;
+window.translate = function(key, params = {}) {
+  return LanguageManager.translate(key, params);
+};
 
 // Initialize language when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -2071,19 +2188,7 @@ function updateUIText() {
     updateElementText('#switchAuth', state.isSignup ? 'login_link' : 'create_one');
   }
   
-  // Update buttons in product cards
-  document.querySelectorAll('.btn').forEach(btn => {
-    if (btn.textContent.includes('Add to Cart') || btn.textContent.includes('أضف إلى السلة')) {
-      btn.innerHTML = `<i class="fa-solid fa-cart-plus"></i> ${translate('add_to_cart')}`;
-      
-      // Update disabled state message
-      if (btn.disabled) {
-        btn.title = translate('please_login');
-      }
-    }
-  });
-  
-  // Update product descriptions and other dynamic content
+  // Update product cards with translated content
   updateProductCards();
 }
 
@@ -2124,6 +2229,9 @@ function updateProductCards() {
       }
     }
   });
+  
+  // Update product descriptions and other dynamic content
+
 }
 
 // Add these translations to the translations object

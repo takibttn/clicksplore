@@ -5,8 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>My Profile - Clicksplore</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <script src="/config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="language.js"></script>
+  <!-- REMOVED language.js import, will use inline or LanguageManager from parent/shared -->
+  
+  <script>
+    // Load environment variables - MUST BE FIRST (Consistent with test3.html)
+    // In a real build step these would be replaced, for now we use the same fallbacks
+    const __cfg = window.__APP_CONFIG__ || {};
+    const SUPABASE_URL = __cfg.SUPABASE_URL;
+    const SUPABASE_ANON_KEY = __cfg.SUPABASE_ANON_KEY;
+    const API_BASE_CONFIG = __cfg.API_BASE; // Production URL
+
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !API_BASE_CONFIG) {
+      throw new Error('Missing runtime config. Ensure /config.js is available and env vars are set.');
+    }
+
+    // Initialize Supabase client
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // Make it globally available
+    window.supabase = supabaseClient;
+  </script>
 
   <style>
     :root{
@@ -444,11 +465,13 @@
 
 <script>
   // ===== Server API Endpoints =====
-const API_BASE = window.location.origin;
+  // Use API_BASE_CONFIG from top of file instead of window.location.origin
+  // This ensures it works both locally (if configured) and in production
+  const API_BASE = (window.location.protocol === 'file:') ? 'http://localhost:3000' : API_BASE_CONFIG;
 
-const SUPABASE_URL = 'https://hsomlteyiyjtusfqxfvh.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhzb21sdGV5aXlqdHVzZnF4ZnZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwMTUzMDgsImV4cCI6MjA3MDU5MTMwOH0.VEjhuylzTwja0crf7Cve9795J3L7QRvQ-8Zic04BtvY';
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // Supabase client is already initialized in the head script as window.supabase
+  // But we keep this local reference for existing code compatibility
+  // const supabaseClient = ... (Already initialized above)
     
 let currentUser = null;
 let userProfile = null;
@@ -470,8 +493,8 @@ async function initializePage() {
   try {
     showLoading();
 
-    // Check if user is authenticated
-    const res = await fetch('/api/profile', { 
+    // Check if user is authenticated - use API_BASE
+    const res = await fetch(`${API_BASE}/api/profile`, { 
       method: 'GET', 
       credentials: 'include'
     });
@@ -489,6 +512,7 @@ async function initializePage() {
       ]);
     } else {
       showToast('Please log in to view your profile', 'error');
+      // Redirect to main page via absolute or relative path
       setTimeout(() => { window.location.href = 'test3.html'; }, 1200);
     }
   } catch (error) {
@@ -531,26 +555,24 @@ function updateUserInterface() {
 // ===== Subscriptions =====
 async function loadUserSubscriptions() {
   try {
-    // Use direct Supabase query since there's no API endpoint for this
-    const { data: subscriptions, error } = await supabaseClient
-      .from('user_subscriptions')
-      .select(`
-        *,
-        subscription_services(name, description, logo_url, our_price, category),
-        shared_accounts(account_credentials, current_users, max_users)
-      `)
-      .eq('user_id', currentUser.id)
-      .order('id', { ascending: false });
+    // Use API endpoint instead of direct Supabase query
+    const res = await fetch(`${API_BASE}/api/user-subscriptions`, {
+      method: 'GET',
+      credentials: 'include'
+    });
 
-    if (error) {
-      console.error('Error loading subscriptions:', error);
+    if (!res.ok) {
+      const errText = await res.text().catch(() => 'No error details');
+      console.error('Failed to load subscriptions. Status:', res.status, 'Error:', errText);
       return;
     }
+
+    const subscriptions = await res.json();
 
     __subscriptions = subscriptions || [];
     displaySubscriptions(__subscriptions);
     document.getElementById('activeSubscriptions').textContent =
-      (__subscriptions).filter(sub => sub.status === 'active').length;
+      (__subscriptions).filter(sub => (sub.status || '').toLowerCase() === 'active').length;
 
     // Populate modal dropdown options
     const sel = document.getElementById('ticketSubscription');
@@ -582,28 +604,34 @@ function displaySubscriptions(subscriptions) {
 }
 
 function createSubscriptionCard(subscription) {
-  const service = subscription.subscription_services;
+  // Fix: Handle potentially missing nested objects safely
+  const service = subscription.subscription_services || {};
   const account = subscription.shared_accounts;
-  const isActive = subscription.status === 'active';
+  const isActive = (subscription.status || '').toLowerCase() === 'active';
   const statusClass = isActive ? 'status-active' : 'status-expired';
-  const statusText = isActive ? 'Active' : 'Inactive';
+  // Capitalize first letter
+  const statusText = subscription.status ? 
+    subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1) : 'Unknown';
   const statusIcon = isActive ? 'check-circle' : 'exclamation-triangle';
 
   const endDate = subscription.end_date ? new Date(subscription.end_date).toLocaleDateString() : 'N/A';
   const renewalDate = subscription.renewal_date ? new Date(subscription.renewal_date).toLocaleDateString() : 'N/A';
+  
+  // Format price safely
+  const price = subscription.payment_amount ? Number(subscription.payment_amount).toFixed(2) : '0.00';
 
   return `
     <div class="subscription-card">
       <div class="subscription-header">
         <div class="subscription-icon"><i class="fas fa-play"></i></div>
         <div class="subscription-info">
-          <h3>${service?.name || 'Unknown Service'}</h3>
-          <div class="subscription-price">$${subscription.payment_amount}/month</div>
+          <h3>${service.name || 'Unknown Service'}</h3>
+          <div class="subscription-price">$${price}/month</div>
         </div>
       </div>
 
       <div class="subscription-status">
-        <div class="status-badge ${statusClass}"><i class="fas fa-${statusIcon}"></i> ${statusText}</div>
+        <div class="status-badge ${statusClass}">${statusText}</div>
         <span style="color:var(--muted);font-size:.9rem;">${account ? 'Shared Account' : 'Private Account'}</span>
       </div>
 
@@ -630,7 +658,7 @@ function createSubscriptionCard(subscription) {
 // ===== Orders =====
 async function loadUserOrders() {
   try {
-    const res = await fetch('/api/orders', {
+    const res = await fetch(`${API_BASE}/api/orders`, {
       method: 'GET',
       credentials: 'include'
     });
@@ -706,7 +734,7 @@ function createOrderCard(order) {
 // ===== Support Tickets =====
 async function loadSupportTickets() {
   try {
-    const res = await fetch('/api/support-tickets', {
+    const res = await fetch(`${API_BASE}/api/support-tickets`, {
       method: 'GET',
       credentials: 'include'
     });
@@ -795,7 +823,7 @@ async function saveProfile(event) {
       }
     }
     
-    const res = await fetch('/api/profile', {
+    const res = await fetch(`${API_BASE}/api/profile`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
@@ -844,7 +872,7 @@ async function changePassword() {
   try {
     showLoading();
     
-    const res = await fetch('/api/change-password', {
+    const res = await fetch(`${API_BASE}/api/change-password`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -896,7 +924,7 @@ async function submitSupportTicket(event) {
       subscription_id: document.getElementById('ticketSubscription').value || null
     };
     
-    const res = await fetch('/api/support-tickets', {
+    const res = await fetch(`${API_BASE}/api/support-tickets`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -930,7 +958,7 @@ async function deleteAccount() {
   try {
     showLoading();
     
-    const res = await fetch('/api/account', {
+    const res = await fetch(`${API_BASE}/api/account`, {
       method: 'DELETE',
       credentials: 'include'
     });
@@ -1182,7 +1210,7 @@ async function viewOrderDetails(orderId) {
     }
     
     // Fetch order items
-    const res = await fetch(`/api/orders/${orderId}/items`, {
+    const res = await fetch(`${API_BASE}/api/orders/${orderId}/items`, {
       method: 'GET',
       credentials: 'include'
     });
@@ -1328,7 +1356,7 @@ async function viewTicket(ticketId) {
 async function logout() {
   try {
     console.log('Starting logout...');
-    console.log('API_BASE:', API_BASE);
+    // API_BASE is already defined at the top
     console.log('Logout URL:', `${API_BASE}/api/logout`);
     
     showLoading();
@@ -1366,7 +1394,8 @@ async function logout() {
     
     // Clear Supabase session
     try {
-      await supabaseClient.auth.signOut();
+      // Use the globally available client
+      await window.supabase.auth.signOut();
     } catch (supabaseError) {
       console.warn('Supabase signout failed:', supabaseError);
     }
@@ -1395,7 +1424,8 @@ async function logout() {
     
     // Clear Supabase session
     try {
-      await supabaseClient.auth.signOut();
+      // Use the globally available client
+      await window.supabase.auth.signOut();
     } catch (supabaseError) {
       console.warn('Supabase signout failed:', supabaseError);
     }
@@ -1424,7 +1454,8 @@ async function loadChatHistory() {
   }
 
   try {
-    const { data, error } = await supabaseClient
+    // Use global supabase instance
+    const { data, error } = await window.supabase
       .from('chat_messages')
       .select('*')
       .or(`from_user_id.eq.${currentUser.id},to_user_id.eq.${currentUser.id}`)
@@ -1466,7 +1497,8 @@ async function saveChatMessage(msg) {
   }
 
   try {
-    const { error } = await supabaseClient
+    // Use global supabase instance
+    const { error } = await window.supabase
       .from('chat_messages')
       .insert({
         from_user_id: currentUser.id,
@@ -1510,7 +1542,8 @@ async function openChatModal() {
 function closeChatModal() {
   document.getElementById('chatModal').classList.remove('show');
   if (chatChannel) {
-    try { supabaseClient.removeChannel(chatChannel); } catch (e) {}
+    // Use global supabase instance
+    try { window.supabase.removeChannel(chatChannel); } catch (e) {}
     chatChannel = null;
   }
 }
@@ -1520,7 +1553,8 @@ function initChat() {
   if (!currentUser?.id) return;
 
   console.log('Subscribing to Supabase Realtime chat messages');
-  chatChannel = supabaseClient
+  // Use global supabase instance
+  chatChannel = window.supabase
     .channel(`chat_messages_to_${currentUser.id}`)
     .on(
       'postgres_changes',
@@ -1563,7 +1597,8 @@ function initCreditsRealtime() {
   if (creditsChannel) return;
   if (!currentUser?.id) return;
 
-  creditsChannel = supabaseClient
+  // Use global supabase instance
+  creditsChannel = window.supabase
     .channel(`credits_${currentUser.id}`)
     .on(
       'postgres_changes',
