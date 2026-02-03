@@ -98,6 +98,12 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'test3.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`Client running on http://localhost:${PORT}`);
-});
+// Export the Express app for Vercel / serverless environments
+module.exports = app;
+
+// If this file is run directly (e.g. `node server.js`), start a local dev server
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Client running locally at http://localhost:${PORT}`);
+  });
+}
