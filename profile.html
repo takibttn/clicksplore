@@ -469,6 +469,18 @@
   // This ensures it works both locally (if configured) and in production
   const API_BASE = (window.location.protocol === 'file:') ? 'http://localhost:3000' : API_BASE_CONFIG;
 
+  async function buildAuthHeaders(extra = {}) {
+    const headers = { ...extra };
+    try {
+      const { data } = await window.supabase.auth.getSession();
+      const token = data?.session?.access_token;
+      if (token) headers.Authorization = `Bearer ${token}`;
+    } catch (e) {
+      // ignore
+    }
+    return headers;
+  }
+
   // Supabase client is already initialized in the head script as window.supabase
   // But we keep this local reference for existing code compatibility
   // const supabaseClient = ... (Already initialized above)
@@ -496,7 +508,8 @@ async function initializePage() {
     // Check if user is authenticated - use API_BASE
     const res = await fetch(`${API_BASE}/api/profile`, { 
       method: 'GET', 
-      credentials: 'include'
+      credentials: 'include',
+      headers: await buildAuthHeaders({ 'Accept': 'application/json', 'Content-Type': 'application/json' })
     });
     
     if (res.ok) {
@@ -558,9 +571,10 @@ async function loadUserSubscriptions() {
     // Use API endpoint instead of direct Supabase query
     const res = await fetch(`${API_BASE}/api/user-subscriptions`, {
       method: 'GET',
-      credentials: 'include'
+      credentials: 'include',
+      headers: await buildAuthHeaders({ 'Accept': 'application/json' })
     });
-
+    
     if (!res.ok) {
       const errText = await res.text().catch(() => 'No error details');
       console.error('Failed to load subscriptions. Status:', res.status, 'Error:', errText);
@@ -660,7 +674,8 @@ async function loadUserOrders() {
   try {
     const res = await fetch(`${API_BASE}/api/orders`, {
       method: 'GET',
-      credentials: 'include'
+      credentials: 'include',
+      headers: await buildAuthHeaders({ 'Accept': 'application/json' })
     });
     
     if (res.ok) {
@@ -736,7 +751,8 @@ async function loadSupportTickets() {
   try {
     const res = await fetch(`${API_BASE}/api/support-tickets`, {
       method: 'GET',
-      credentials: 'include'
+      credentials: 'include',
+      headers: await buildAuthHeaders({ 'Accept': 'application/json' })
     });
     
     if (res.ok) {
@@ -825,9 +841,10 @@ async function saveProfile(event) {
     
     const res = await fetch(`${API_BASE}/api/profile`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: await buildAuthHeaders({
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }),
       credentials: 'include',
       body: JSON.stringify(formData)
     });
@@ -874,9 +891,10 @@ async function changePassword() {
     
     const res = await fetch(`${API_BASE}/api/change-password`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: await buildAuthHeaders({
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }),
       credentials: 'include',
       body: JSON.stringify({
         currentPassword,
@@ -926,9 +944,10 @@ async function submitSupportTicket(event) {
     
     const res = await fetch(`${API_BASE}/api/support-tickets`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: await buildAuthHeaders({
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }),
       credentials: 'include',
       body: JSON.stringify(formData)
     });
@@ -960,7 +979,8 @@ async function deleteAccount() {
     
     const res = await fetch(`${API_BASE}/api/account`, {
       method: 'DELETE',
-      credentials: 'include'
+      credentials: 'include',
+      headers: await buildAuthHeaders({ 'Accept': 'application/json' })
     });
     
     if (res.ok) {
@@ -1144,7 +1164,8 @@ async function confirmCancelSubscription(subId, fromManage) {
     
     const res = await fetch(`/api/subscriptions/${subId}/cancel`, {
       method: 'POST',
-      credentials: 'include'
+      credentials: 'include',
+      headers: await buildAuthHeaders({ 'Accept': 'application/json' })
     });
     
     if (res.ok) {
@@ -1175,7 +1196,8 @@ async function renewSubscription(subId) {
     
     const res = await fetch(`/api/subscriptions/${subId}/renew`, {
       method: 'POST',
-      credentials: 'include'
+      credentials: 'include',
+      headers: await buildAuthHeaders({ 'Accept': 'application/json' })
     });
     
     if (res.ok) {
@@ -1212,7 +1234,8 @@ async function viewOrderDetails(orderId) {
     // Fetch order items
     const res = await fetch(`${API_BASE}/api/orders/${orderId}/items`, {
       method: 'GET',
-      credentials: 'include'
+      credentials: 'include',
+      headers: await buildAuthHeaders({ 'Accept': 'application/json' })
     });
     
     let orderItems = [];
@@ -1366,9 +1389,10 @@ async function logout() {
       const response = await fetch(`${API_BASE}/api/logout`, { 
         method: 'POST', 
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: await buildAuthHeaders({
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        })
       });
       
       if (!response.ok) {
