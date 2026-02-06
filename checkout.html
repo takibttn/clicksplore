@@ -21,6 +21,18 @@
         const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         window.supabase = supabaseClient;
 
+        async function buildAuthHeaders(extra = {}) {
+            const headers = { ...extra };
+            try {
+                const { data } = await window.supabase.auth.getSession();
+                const token = data?.session?.access_token;
+                if (token) headers.Authorization = `Bearer ${token}`;
+            } catch (e) {
+                // ignore
+            }
+            return headers;
+        }
+
         function apiUrl(path) {
             if (!path) return API_BASE_CONFIG;
             if (path.startsWith('http://') || path.startsWith('https://')) return path;
@@ -1087,7 +1099,8 @@
         async function loadUserCredits() {
             try {
                 const response = await fetch(apiUrl('/api/profile'), {
-                    credentials: 'include'
+                    credentials: 'include',
+                    headers: await buildAuthHeaders({ 'Accept': 'application/json' })
                 });
                 
                 if (!response.ok) return;
@@ -1144,9 +1157,10 @@
                 
                 const response = await fetch('/api/promo/validate', {
                     method: 'POST',
-                    headers: {
+                    headers: await buildAuthHeaders({
                         'Content-Type': 'application/json',
-                    },
+                        'Accept': 'application/json'
+                    }),
                     credentials: 'include',
                     body: JSON.stringify({
                         code: code,
@@ -1263,9 +1277,10 @@
                 // Create order via API for other payment methods
                 const response = await fetch(apiUrl('/api/checkout/order'), {
                     method: 'POST',
-                    headers: {
+                    headers: await buildAuthHeaders({
                         'Content-Type': 'application/json',
-                    },
+                        'Accept': 'application/json'
+                    }),
                     credentials: 'include',
                    body: JSON.stringify({
   billingInfo: formData,
@@ -1308,9 +1323,10 @@
             try {
                 const response = await fetch(apiUrl('/api/checkout/wallet'), {
                     method: 'POST',
-                    headers: {
+                    headers: await buildAuthHeaders({
                         'Content-Type': 'application/json',
-                    },
+                        'Accept': 'application/json'
+                    }),
                     credentials: 'include',
                     body: JSON.stringify({
                         billingInfo: formData,
@@ -1366,9 +1382,10 @@
                 // Create Chargily checkout via server (keeps secret key off the client)
                 const chargilyResponse = await fetch(clientApiUrl('/api/chargily/create-checkout'), {
                     method: 'POST',
-                    headers: {
+                    headers: await buildAuthHeaders({
                         'Content-Type': 'application/json',
-                    },
+                        'Accept': 'application/json'
+                    }),
                     credentials: 'include',
                     body: JSON.stringify({
                         amount: Math.round(amountInDzd),
@@ -1403,9 +1420,10 @@
                 // Create order in your system first
                 const orderResponse = await fetch(apiUrl('/api/checkout/order'), {
                     method: 'POST',
-                    headers: {
+                    headers: await buildAuthHeaders({
                         'Content-Type': 'application/json',
-                    },
+                        'Accept': 'application/json'
+                    }),
                     credentials: 'include',
                     body: JSON.stringify({
                         billingInfo: formData,
@@ -1502,7 +1520,8 @@
         async function loadCartItems() {
             try {
                 const response = await fetch(apiUrl('/api/checkout/cart'), {
-                    credentials: 'include'
+                    credentials: 'include',
+                    headers: await buildAuthHeaders({ 'Accept': 'application/json' })
                 });
                 
                 if (!response.ok) {
