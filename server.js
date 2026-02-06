@@ -84,6 +84,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'test3.html'));
 });
 
+// Explicitly serve Google verification file
+app.get('/googled19b672ddd1ee402.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'googled19b672ddd1ee402.html'));
+});
+
 // Serve any other .html files
 app.get('/:page.html', (req, res) => {
   res.sendFile(path.join(__dirname, `${req.params.page}.html`), (err) => {
@@ -91,11 +96,6 @@ app.get('/:page.html', (req, res) => {
       res.status(404).send('Page not found');
     }
   });
-});
-
-// Explicitly serve Google verification file
-app.get('/googled19b672ddd1ee402.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'googled19b672ddd1ee402.html'));
 });
 
 // Fallback: serve test3.html for unknown routes
