@@ -93,6 +93,11 @@ app.get('/:page.html', (req, res) => {
   });
 });
 
+// Explicitly serve Google verification file
+app.get('/googled19b672ddd1ee402.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'googled19b672ddd1ee402.html'));
+});
+
 // Fallback: serve test3.html for unknown routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'test3.html'));
